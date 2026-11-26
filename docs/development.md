@@ -10,7 +10,7 @@ What each call sends and answers is in the [API examples](design/api-examples.md
 | --- | --- |
 | Tools | Free to choose for this module. Django 5.2 (long-term support) and Django REST Framework (server), React with Vite (browser) |
 | Python | A virtual environment in `.venv`, with versions listed in `backend/requirements.txt` |
-| Processing | LibreOffice and Tesseract on our server |
+| Processing | LibreOffice and Tesseract on our server, found the same way as in Cohortly: `SOFFICE_PATH` or `TESSERACT_PATH` in `.env`, then the PATH, then the usual place. Doc2All keeps its own LibreOffice settings folder |
 | Reuse | We reuse working code from our earlier project, Cohortly, then add what is missing |
 | Database | SQLite while the features are built. PostgreSQL with a limited app account (see the [data model](design/data-model.md)) before release |
 | Keys and tokens | Added later, with the pieces that need them: email sending, outside OCR, database password, deployment secret. The app runs on a developer's computer with none of them |
@@ -67,7 +67,7 @@ Never import from that folder. The report's Implementation section must say whic
 
 | From Cohortly | Use it for | Change before use |
 | --- | --- | --- |
-| `converter/tools.py` | Running LibreOffice and Tesseract with a time limit in a temporary folder | Add memory and CPU limits, a non-administrator account, bomb checks before opening |
+| `converter/tools.py` (taken into `backend/core/tools.py`) | Running LibreOffice and Tesseract with a time limit in a temporary folder | Add memory and CPU limits, a non-administrator account, bomb checks before opening |
 | `converter/views.py` | Convert endpoints, size caps, first-bytes check, throttle | Add the owner check and audit log. Keep throttle counts outside process memory |
 | `converter/Dockerfile` | Container with the processing tools | Never tested. Add a non-root user and resource limits |
 | Chat `services.py`: upload checks | The upload gate (extension list, first bytes, size, clean names) | Match SR-08 and SR-09 |

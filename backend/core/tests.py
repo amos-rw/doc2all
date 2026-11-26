@@ -1,5 +1,13 @@
 from django.test import SimpleTestCase, override_settings
 
+from core import tools
+
+
+class FindProgramTests(SimpleTestCase):
+    def test_a_configured_path_comes_first(self):
+        with override_settings(SOFFICE_PATH=__file__):
+            self.assertEqual(tools.find("libreoffice"), __file__)
+
 
 class DevHealthTests(SimpleTestCase):
     @override_settings(DEBUG=True)

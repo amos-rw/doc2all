@@ -1,20 +1,32 @@
 """Doc2All settings.
 
-Nothing needs a key to run on a developer's computer. Setting DJANGO_SECRET_KEY switches
+Nothing needs a key to run on a developer's computer. Values come from environment variables, or from a
+`.env` file in the project folder (ignored by git; see `.env.example`). Setting DJANGO_SECRET_KEY switches
 development mode off, so a real deployment cannot run with the development defaults.
 """
-import os
 import secrets
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+from decouple import Config, RepositoryEmpty, RepositoryEnv
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
+BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_FILE = BASE_DIR.parent / ".env"
+config = Config(RepositoryEnv(ENV_FILE) if ENV_FILE.is_file() else RepositoryEmpty())
+
+SECRET_KEY = config("DJANGO_SECRET_KEY", default="")
 DEBUG = not SECRET_KEY
 if DEBUG:
     SECRET_KEY = secrets.token_urlsafe(50)  # new at every start, never written down
 
-ALLOWED_HOSTS = [host for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host]
+ALLOWED_HOSTS = [host for host in config("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",") if host]
+
+# The processing programs. Empty means: find them (PATH, then the usual Windows place).
+SOFFICE_PATH = config("SOFFICE_PATH", default="")  # LibreOffice
+TESSERACT_PATH = config("TESSERACT_PATH", default="")
+TESSDATA_DIR = config("TESSDATA_DIR", default="")  # folder with the Tesseract language files (eng, fra, ...)
+CONVERTER_TIMEOUT = config("CONVERTER_TIMEOUT", default=60, cast=int)  # seconds one job may take (SR-12)
+CONVERTER_WORKDIR = config("CONVERTER_WORKDIR", default="")  # where temporary files go; empty = system temp folder
+CONVERTER_PROFILE_DIR = config("CONVERTER_PROFILE_DIR", default="")  # LibreOffice settings folder of our own
 
 # Django's sign-in apps are not installed yet. Add our own user model before adding them.
 INSTALLED_APPS = [

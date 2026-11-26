@@ -76,9 +76,13 @@ Being built. It needs Python 3.12 or newer, LibreOffice and Tesseract.
 ```
 python -m venv .venv
 .venv\Scripts\python -m pip install -r backend\requirements.txt
+.venv\Scripts\python backend\manage.py check_tools
 .venv\Scripts\python backend\manage.py runserver 8010
 .venv\Scripts\python backend\manage.py test core
 ```
+
+`check_tools` really uses LibreOffice and Tesseract on made-up pages. If they are in an unusual place, copy `.env.example`
+to `.env` and set the paths.
 
 This is development mode, only for your own computer. Setting `DJANGO_SECRET_KEY` turns it off. To make the pages use
 the real server instead of the demo data, set `VITE_API` to `server` before starting them.
