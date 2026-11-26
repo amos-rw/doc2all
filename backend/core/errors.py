@@ -1,6 +1,5 @@
 """Every refused call answers the same way: a status, and {"error": code, "message": plain words}."""
 from rest_framework.exceptions import APIException
-from rest_framework.views import exception_handler
 
 
 class Problem(APIException):
@@ -15,6 +14,8 @@ PLAIN = {400: ("bad_request", "Something in the request is wrong."), 404: ("not_
 
 
 def handler(error, context):
+    from rest_framework.views import exception_handler  # imported late: the views need this module first
+
     response = exception_handler(error, context)
     if response is None:
         return None  # an unexpected error: Django answers 500, without details outside development

@@ -10,7 +10,7 @@ What each call sends and answers is in the [API examples](design/api-examples.md
 | --- | --- |
 | Tools | Free to choose for this module. Django 5.2 (long-term support) and Django REST Framework (server), React with Vite (browser) |
 | Python | A virtual environment in `.venv`, with versions listed in `backend/requirements.txt` |
-| Processing | LibreOffice and Tesseract on our server, found the same way as in Cohortly: `SOFFICE_PATH` or `TESSERACT_PATH` in `.env`, then the PATH, then the usual place. Doc2All keeps its own LibreOffice settings folder |
+| Processing | LibreOffice and Tesseract on our server, found the same way as in Cohortly: `SOFFICE_PATH` or `TESSERACT_PATH` in `.env`, then the PATH, then the usual place. Each job works with its own copy of a clean LibreOffice settings folder |
 | Reuse | We reuse working code from our earlier project, Cohortly, then add what is missing |
 | Database | SQLite while the features are built. PostgreSQL with a limited app account (see the [data model](design/data-model.md)) before release |
 | Keys and tokens | Added later, with the pieces that need them: email sending, outside OCR, database password, deployment secret. The app runs on a developer's computer with none of them |
@@ -55,21 +55,20 @@ Protections that need an account, such as the owner check and the limit per user
 
 | Piece | Works | Protected and tested |
 | --- | --- | --- |
-| Upload (type from name and first bytes, 20 MB, private folder) | yes | partly |
-| Convert Word and PowerPoint to PDF | yes | not yet |
-| Download, history, delete (24 hours checked when files are used) | yes | not yet |
+| Upload | yes | yes, except what needs accounts |
+| Convert Word and PowerPoint to PDF | yes | yes, except a separate runner (deployment) |
+| Download, history, delete, 24-hour timer, audit log | yes | yes, except what needs accounts |
 | Convert PDF to images, clean, scan to text, black out | not yet | |
 | Accounts, notices, administrator pages | demo data | |
 
-To protect upload and convert next:
+What was attacked, fixed and left open: [security testing of upload and convert](testing/upload-and-convert.md).
 
-- A look inside Office files before opening them, bomb checks and the page limit (SR-09, SR-14).
-- LibreOffice must not run macros or fetch anything from outside while converting (SR-12, SR-15, AC-06).
-- A memory limit, a non-administrator account, and a runner apart from the web server (SR-12, SR-13).
-- A limit on uploads and on jobs at the same time, and refusing a too large request before reading it (SR-09, AC-09).
-- The form token on every change, and download headers (SR-21).
-- A timer that deletes after 24 hours, and the audit log (SR-18, SR-20).
-- The owner check, which arrives with the accounts (SR-04, AC-01, AC-02).
+Rules for the next pieces that open files:
+
+- New file kinds pass the gate (`backend/files/gate.py`) and get their own look inside before anything opens them.
+- Programs are started only through `backend/core/tools.py`, which sets the limits.
+- A new trick file goes into `backend/files/attacks.py` with a test.
+- Every action on a file writes an audit line, with ids only.
 
 ## Pages and demo server
 
@@ -88,7 +87,7 @@ Never import from that folder. The report's Implementation section must say whic
 
 | From Cohortly | Use it for | Change before use |
 | --- | --- | --- |
-| `converter/tools.py` (taken into `backend/core/tools.py`) | Running LibreOffice and Tesseract with a time limit in a temporary folder | Add memory and CPU limits, a non-administrator account, bomb checks before opening |
+| `converter/tools.py` (taken into `backend/core/tools.py`) | Running LibreOffice and Tesseract with a time limit in a temporary folder | Done: memory and process limits, clean environment, no administrator, bomb checks. Open: a separate runner |
 | `converter/views.py` | Convert endpoints, size caps, first-bytes check, throttle | Add the owner check and audit log. Keep throttle counts outside process memory |
 | `converter/Dockerfile` | Container with the processing tools | Never tested. Add a non-root user and resource limits |
 | Chat `services.py`: upload checks | The upload gate (extension list, first bytes, size, clean names) | Match SR-08 and SR-09 |

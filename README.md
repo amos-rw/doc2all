@@ -9,7 +9,8 @@ It is a project for the module *Application Security Technologies*, to show secu
 development life cycle (SDLC)**.
 
 > Status: requirements and design written. All pages work. Upload and convert (Word and PowerPoint to PDF) run on
-> the server; the other pages still use made-up demo data. **Not yet protected: for a developer's own computer only.**
+> the server and have been [security tested](docs/testing/upload-and-convert.md); the other pages still use made-up demo
+> data. **There are no accounts yet: for a developer's own computer only.**
 
 ## What it does
 
@@ -34,6 +35,7 @@ development life cycle (SDLC)**.
 | [Data model](docs/design/data-model.md) | What is saved, how it connects, when it is removed |
 | [Server interfaces](docs/design/server-interfaces.md) | Every call the browser can make, who may make it, what is checked |
 | [Development plan](docs/development.md) | Tools, code reused from our earlier project, build order |
+| [Security testing](docs/testing/upload-and-convert.md) | What was attacked, what was found and fixed, what is open |
 | [Concept](docs/01-concept.md) | The first idea, in one page |
 
 ## Tools
@@ -86,7 +88,8 @@ the demo again.
 | --- | --- |
 | See every page without the server | `npm.cmd --prefix frontend run demo` |
 | Use only the real server | set `VITE_API` to `server` before starting the pages |
-| Test the server | `.venv\Scripts\python backend\manage.py test core files` |
+| Test the server and its protections | `.venv\Scripts\python backend\manage.py test core files` |
+| Check that no audit line was altered | `.venv\Scripts\python backend\manage.py check_audit` |
 | Check the demo server against the design | `npm.cmd --prefix frontend test` |
 
 `check_tools` really uses LibreOffice and Tesseract on made-up pages. If they are in an unusual place, copy

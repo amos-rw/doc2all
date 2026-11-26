@@ -14,7 +14,7 @@ const useServer = (path) => mode === 'server' || (mode === 'mixed' && BUILT.test
 
 const NO_SERVER = 'The server is not answering. Is it running on port 8010?'
 
-let formToken = ''
+let formToken = '' // the server's, fetched when first needed
 let signedOutListener = () => {}
 
 export function onSignedOut(listener) {
@@ -23,7 +23,12 @@ export function onSignedOut(listener) {
 
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-async function send(method, path, body) {
+async function fetchFormToken() {
+  const response = await fetch('/api/session', { credentials: 'same-origin' }).catch(() => null)
+  if (response?.ok) formToken = (await response.json()).formToken
+}
+
+async function send(method, path, body, again = false) {
   const headers = {}
   let payload
   if (body instanceof Blob) {
@@ -33,7 +38,10 @@ async function send(method, path, body) {
     headers['Content-Type'] = 'application/json'
     payload = JSON.stringify(body)
   }
-  if (method !== 'GET') headers['X-CSRFToken'] = formToken
+  if (method !== 'GET') {
+    if (!formToken || again) await fetchFormToken()
+    headers['X-CSRFToken'] = formToken
+  }
   let response
   try {
     response = await fetch(path, { method, headers, body: payload, credentials: 'same-origin' })
@@ -43,6 +51,7 @@ async function send(method, path, body) {
   const isJson = response.headers.get('Content-Type')?.includes('json')
   if (!response.ok) {
     const data = isJson ? await response.json() : {}
+    if (data.error === 'token' && !again) return send(method, path, body, true) // the token was out of date
     const fallback = response.status >= 500 && !isJson ? NO_SERVER : 'Something went wrong.'
     throw new ApiError(response.status, data.error, data.message || fallback, data)
   }
@@ -67,7 +76,6 @@ export async function request(method, path, body) {
     } else {
       data = await send(method, path, body)
     }
-    if (data?.formToken) formToken = data.formToken
     return data
   } catch (error) {
     if (error.status === 401) signedOutListener()

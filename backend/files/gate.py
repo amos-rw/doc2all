@@ -1,11 +1,13 @@
 """The one door for files. The server decides the type from the name and the first bytes, never the browser.
 
-Adapted from the upload checks of Cohortly. Still to add when the work is protected: page limit, upload rate,
-bomb checks and a look inside Office files.
+Adapted from the upload checks of Cohortly. Word and PowerPoint files are also looked into (inspect_office).
+PDF pages are not counted yet: that comes with the PDF work.
 """
 from pathlib import PurePath
 
 from django.conf import settings
+
+from . import inspect_office
 
 FIRST_BYTES = {
     "pdf": b"%PDF",
@@ -52,4 +54,9 @@ def check(upload):
         raise Refused(f"Its name says {name}, but it is a program.")
     if not start.startswith(FIRST_BYTES[kind]):
         raise Refused(f"Its name says {name}, but the content is something else.")
+    if kind in inspect_office.MAIN_PART:
+        try:
+            inspect_office.check(upload, kind, name)
+        except inspect_office.Refused as refusal:
+            raise Refused(str(refusal)) from None
     return name, kind

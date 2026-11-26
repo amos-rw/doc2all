@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from core import tools
 
+from . import attacks
 from .models import Finding, Job, Report, StoredFile
 
 SAMPLES = Path(__file__).resolve().parents[2] / "samples" / "public"
@@ -112,7 +113,8 @@ class ConvertTests(FilesCase):
         self.assertTrue(self.client.get(f"/api/jobs/{job}/report").json()["fileDeleted"])
 
     def test_a_damaged_file_ends_with_a_clear_message(self):
-        file = self.upload("broken.docx", b"PK\x03\x04" + bytes(range(256)) * 4).json()
+        damaged = attacks.rebuild("sample-letter.docx", {"word/document.xml": lambda xml: "<broken"})
+        file = self.upload("broken.docx", damaged).json()
         job = self.convert(file["id"]).json()["id"]
         report = self.client.get(f"/api/jobs/{job}/report").json()
         self.assertEqual((self.client.get(f"/api/jobs/{job}").json()["status"], report["outcome"]), ("failed", "failed"))

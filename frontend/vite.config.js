@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 5180,
     strictPort: true,
-    proxy: { '/api': 'http://127.0.0.1:8010' },
+    // changeOrigin stays off: the server compares the page's address with the one it was called by (form token).
+    proxy: { '/api': { target: 'http://127.0.0.1:8010', changeOrigin: false } },
   },
 })

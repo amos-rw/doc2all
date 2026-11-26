@@ -7,6 +7,8 @@ from pathlib import Path
 from django.conf import settings
 from django.utils import timezone
 
+from core import audit
+
 from .models import StoredFile
 
 KEEP_FOR = timedelta(hours=24)
@@ -50,6 +52,8 @@ def remove_with_results(source):
 
 
 def purge_expired():
-    """Removes content older than 24 hours. Called when files are used; a timer of its own comes with deletion."""
+    """Removes content older than 24 hours. Called by the server's timer, and also when files are used."""
     for record in StoredFile.objects.filter(deleted_at__isnull=True, delete_after__lte=timezone.now()):
         remove_content(record)
+        if record.job_id is None:
+            audit.record("Delete after 24 hours", target=record.id)

@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
+from core import audit, limits
 from core.errors import Problem
 
 from . import gate, storage, work
@@ -23,7 +24,11 @@ STEPS = ["I checked what the file really is", "I opened a copy to work on", "Con
 # kind -> (all is well, title, detail, tag)
 FINDINGS = {
     "converted": (True, "Converted to PDF", "Made from a copy of your file.", "Done"),
-    "not_checked": (False, "Not checked for hidden content", "That check is not built yet.", "Not checked"),
+    "macro": (True, "Macros left out: {n}", "Programs inside the file were never opened.", "Removed"),
+    "outside_link": (True, "Outside links blocked: {n}", "The file asked for something from outside. Nothing was fetched.", "Blocked"),
+    "outside_field": (True, "Fetching fields blocked: {n}", "The file tried to pull in other text or pictures. It could not.", "Blocked"),
+    "not_checked": (False, "Other hidden content not checked yet", "Names, comments and hidden text can still be in the PDF.", "Not checked"),
+    "too_long": (False, "This document is longer than 100 pages", "Nothing was made from it.", "Refused"),
     "could_not_convert": (False, "This file could not be converted", "It may be damaged or protected by a password.", "Failed"),
     "deleted_meanwhile": (False, "The file was deleted", "Nothing was made from it.", "Stopped"),
 }
@@ -42,9 +47,10 @@ def _live_file(file_id):
 
 def _job(job_id):
     job = get_object_or_404(Job.objects.select_related("file"), pk=job_id)
-    # A job cut off by a server restart must not look busy for ever.
-    if job.status in (Job.WAITING, Job.RUNNING) and timezone.now() - job.started_at > timedelta(seconds=settings.CONVERTER_TIMEOUT * 3):
-        work._finish(job.id, Job.FAILED, "failed", ["could_not_convert"], error="interrupted")
+    # A job cut off by a server restart must not look busy for ever. A waiting job may wait for others first.
+    patience = settings.CONVERTER_TIMEOUT * (3 if job.status == Job.RUNNING else settings.MAX_ACTIVE_JOBS + 3)
+    if job.status in (Job.WAITING, Job.RUNNING) and timezone.now() - job.started_at > timedelta(seconds=patience):
+        work._finish(job.id, Job.FAILED, "failed", {"could_not_convert": 1}, error="interrupted")
         job.refresh_from_db()
     return job
 
@@ -53,14 +59,17 @@ def _job(job_id):
 @parser_classes([MultiPartParser])
 def upload(request):
     storage.purge_expired()
+    limits.count("upload", request, settings.UPLOADS_PER_HOUR, message=f"That is {settings.UPLOADS_PER_HOUR} uploads in an hour. Try again later.")
     sent = request.FILES.get("file")
     if sent is None:
         raise Problem(400, "no_file", "Choose a file.")
     try:
         name, kind = gate.check(sent)
     except gate.Refused as refusal:
+        audit.record("Upload", "Refused")
         raise Problem(400, "refused", str(refusal)) from None
     record = storage.save(sent.chunks(), shown_name=name, kind=kind)
+    audit.record("Upload", target=record.id)
     return Response({"id": record.id, "name": name, "kind": kind, "size": record.size, "expiresAt": _ms(record.delete_after),
                      "allowed": gate.READY[kind], "soon": gate.SOON[kind]})
 
@@ -68,7 +77,9 @@ def upload(request):
 @api_view(["DELETE"])
 def delete_file(request, file_id):
     record = _live_file(file_id)
-    storage.remove_with_results(record.job.file if record.job else record)
+    source = record.job.file if record.job else record
+    storage.remove_with_results(source)
+    audit.record("Delete file", target=source.id)
     return Response({"deletedAt": _ms(timezone.now())})
 
 
@@ -81,7 +92,8 @@ def download(request, file_id):
     except FileNotFoundError:
         raise Problem(404, "not_found", "This file was deleted.") from None
     response = FileResponse(content, as_attachment=True, filename=record.shown_name, content_type=TYPES.get(record.kind, "application/octet-stream"))
-    response["Cache-Control"] = "no-store"
+    response["Content-Security-Policy"] = "default-src 'none'; sandbox"  # shown by mistake, it can run nothing
+    audit.record("Download", target=record.id)
     return response
 
 
@@ -94,6 +106,11 @@ def start_job(request):
         raise Problem(400, "no_action", "Choose what to do with the file.")
     if record.job or any(action not in gate.READY[record.kind] for action in asked):
         raise Problem(400, "not_ready", "That cannot be done with this file yet.")
+    busy = Job.objects.filter(status__in=(Job.WAITING, Job.RUNNING), started_at__gt=timezone.now() - timedelta(seconds=settings.CONVERTER_TIMEOUT * (settings.MAX_ACTIVE_JOBS + 3)))
+    if busy.filter(file=record).exists():
+        raise Problem(429, "busy", "This file is already being worked on.")
+    if busy.count() >= settings.MAX_ACTIVE_JOBS:
+        raise Problem(429, "busy", "Doc2All is busy. Try again in a minute.")
     job = Job.objects.create(file=record, actions=list(dict.fromkeys(asked)))
     work.start(job)
     return Response({"id": job.id})
@@ -114,7 +131,10 @@ def report(request, job_id):
     if found is None:
         raise Problem(404, "not_ready", "The report is not ready yet.")
     result = job.results.first()
-    lines = [dict(zip(("ok", "title", "detail", "tag"), FINDINGS[line.kind])) for line in found.findings.all()]
+    lines = []
+    for line in found.findings.all():
+        ok, title, detail, tag = FINDINGS[line.kind]
+        lines.append({"ok": ok, "title": title.format(n=line.how_many), "detail": detail, "tag": tag})
     return Response({"jobId": job.id, "fileId": job.file.id, "resultId": result.id if result else None, "fileName": job.file.shown_name,
                      "actions": job.actions, "outcome": found.result, "findings": lines, "expiresAt": _ms(job.file.delete_after),
                      "fileDeleted": job.file.gone})
@@ -139,5 +159,6 @@ def history(request):
 def remove_history(request, job_id):
     source = _job(job_id).file
     storage.remove_with_results(source)
+    audit.record("Remove from history", target=source.id)
     source.delete()  # takes its jobs, results, reports and findings with it
     return Response({"ok": True})

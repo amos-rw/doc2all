@@ -54,7 +54,7 @@ class Command(BaseCommand):
             self.stdout.write(f"  {title} to PDF: works")
 
         picture = tools.office_convert(folder / "page.fodt", "png", folder)
-        code, output = tools.tesseract([str(picture), "stdout", "-l", "eng"])
+        code, output = tools.tesseract([str(picture), "stdout", "-l", "eng"], folder)
         if code != 0 or "safe documents" not in output.lower():
             raise tools.ToolError("Tesseract could not read the test page.")
         self.stdout.write("  Reading a picture: works")
