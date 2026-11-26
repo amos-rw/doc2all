@@ -29,7 +29,11 @@ design_a, design_b = design.split("<!--DFD-->")
 design_intro, design_41 = design_a.split("### 4.1", 1)
 # 4.6 has its own pages: the map, then the key screens
 design_b, design_46 = design_b.split("### 4.6", 1)
+design_46, design_47 = design_46.split("### 4.7", 1)
 screens_intro, screens_table = ("### 4.6" + design_46).split("<!--SCREENS-->")
+# the still data model drawing (made by build_data_model.py) gets its own landscape page, its tables follow
+data_html = (root / "docs" / "design" / "_data_print.html").read_text(encoding="utf-8")
+data_intro, data_tables = ("### 4.7" + design_47).split("<!--DATA-->")
 design_41 = "### 4.1" + design_41
 
 extra_css = """
@@ -66,7 +70,7 @@ PLAN = [
     ("1", "Introduction", "The problem, why security matters, and security in every step of the life cycle"),
     ("2", "Objectives", "The general objective and the specific objectives, in the order the system is built"),
     ("3", "Requirements", "Functional, non-functional and security requirements, abuse cases and traceability"),
-    ("4", "Design", "The threat model (data-flow diagram, trust boundaries, threats and protections) and the screens"),
+    ("4", "Design", "The threat model (data-flow diagram, trust boundaries, threats and protections), the screens and the data model"),
     ("5", "Implementation", "Secure coding rules and the features, built one after another"),
     ("6", "Testing", "One test per abuse case, code, dependency and dynamic scans, fixes and retests"),
     ("7", "Deployment", "The hardening checklist for going live"),
@@ -361,6 +365,12 @@ strong{{color:var(--head)}}
 
 <article class="paper doc">
   <div class="block">{screen_pages(screens_table)}</div>
+</article>
+
+<section class="paper land">{render(data_intro)}{data_html}</section>
+
+<article class="paper doc">
+  <div class="block">{render(data_tables)}</div>
 
   <div class="block">
     <div class="kicker">References</div>

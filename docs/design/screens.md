@@ -101,7 +101,7 @@ Every finding is one sentence that says what it means and what was done. What th
 
 ## 8. History
 
-The bell keeps a count and a list. A security notice, like a new passkey, stays pinned at the top until the user answers it. The profile menu holds Settings and Sign out. After 30 minutes of nothing, the session ends with a friendly message.
+A deleted file stays in the list by name until the user removes it. The bell keeps a count and a list. A security notice, like a new passkey, stays pinned at the top until the user answers it. The profile menu holds Settings and Sign out. After 30 minutes of nothing, the session ends with a friendly message.
 
 - Views: Your files, Pinned notice, Notifications, Profile menu, Session ended
 - Requirements: FR-08, SR-03, SR-04, SR-18, SR-26, SR-28, SR-29, AC-02

@@ -8,7 +8,7 @@ Where each design lives. If two documents disagree, the [report text](../02-doc2
 | Security rules for developers | [security-rules.md](security-rules.md) | the same file | written by hand |
 | Screens | [screens.md](screens.md), report section 4.6 | `screens.src.html` | `build_screens.py`, `build_screen_shots.py`, `build_screens_doc.py` |
 | The cat, colours and type | `doc2all-cat.html` (open in a browser) | the same file | written by hand |
-| Data model | to be designed (report section 4.7) | | |
+| Data model | [data-model.md](data-model.md), report section 4.7 | `build_data_model.py` | `build_data_model.py` |
 | Server interfaces | to be designed (report section 4.8) | | |
 
 ## Files here
@@ -25,4 +25,5 @@ Interactive previews (private Claude pages of the author):
 [report](https://claude.ai/artifact/R3YzPu7QBBQrbGVaPw6ZpK) ·
 [threat model tour](https://claude.ai/artifact/36jnFcuxqsz5RbK412PoaP) ·
 [screens](https://claude.ai/artifact/8aEvFXWLE7zcDjJ4owATdj) ·
-[cat](https://claude.ai/artifact/Por6pHoLVCK7YRSGcGFXjJ)
+[cat](https://claude.ai/artifact/Por6pHoLVCK7YRSGcGFXjJ) ·
+[data model](https://claude.ai/artifact/V9gsmYkzTdkW5tRiqJyvTM)

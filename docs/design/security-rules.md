@@ -25,7 +25,7 @@ checked are in the [report text](../02-doc2all-report.md), sections 3.5, 3.6 and
 | Second step | Always. Again for changing password, email or passkeys, and for deleting the account | SR-27 |
 | Passkeys (WebAuthn) | Only the public key is stored, new challenge each time, own domain only, last second step cannot be removed | SR-28 |
 | Signed-in only | Everything except sign-in, registration, forgot password, Privacy, Cookies, About | SR-07 |
-| Roles | Administrators see records and the audit log, never document content | SR-06 |
+| Roles | Administrators see records and the audit log with ids, never file names or document content | SR-06 |
 
 ## Upload and processing
 
@@ -59,16 +59,19 @@ Scan the result again, and name in the report what was removed and what was kept
 - Files and results are deleted after 24 hours, or at once on request. Every deletion is logged and shown in the report (SR-18).
 - Deleting an account removes files, passkeys and sessions at once. The audit log keeps entries under a random user id,
   without name or email (SR-18).
+- History keeps the file name and result until the user removes them (SR-18).
 
 ## Notices and sound
 
 - Security changes and a sign-in on a new device: pinned in the app until answered, and emailed. An email change goes to
   the old address (SR-29).
+- A device is known by a random value in a needed cookie. Save only its hash (SR-29).
 - Notices about files: in the app only (SR-29). There are no push notifications.
 - A finished job plays one short sound that can be switched off. The screen always shows the same news (NFR-11).
 
 ## Audit log and release
 
-- Record sign-in, upload, each step, download and deletion, with user, time and result. Users cannot change it (SR-20).
+- Record sign-in, upload, each step, download and deletion, with user id, time and result. Users cannot change it. The app account
+  can only add and read. Each line carries a keyed fingerprint of the line before (SR-20).
 - HTTPS only, with security headers (SR-21). Debug off, plain error messages (SR-23).
 - Before release: no known high or critical vulnerability. Run `bandit`, `pip-audit`, `npm audit` and OWASP ZAP (SR-24).

@@ -30,13 +30,14 @@ development life cycle (SDLC)**.
 | [Design index](docs/design/README.md) | Where each design lives and how to rebuild it |
 | [Security rules](docs/design/security-rules.md) | What every feature must check, with the limits |
 | [Screens](docs/design/screens.md) | The eleven screens, their views and rules |
+| [Data model](docs/design/data-model.md) | What is saved, how it connects, when it is removed |
 | [Development plan](docs/development.md) | Tools, code reused from our earlier project, build order |
 | [Concept](docs/01-concept.md) | The first idea, in one page |
 
 ## Tools
 
 Chosen by us (the module leaves the choice open): **Django and Django REST Framework** for the server, **React** for the
-browser, **LibreOffice** and **Tesseract** for processing. All are free and open source.
+browser, **PostgreSQL** for the database, **LibreOffice** and **Tesseract** for processing. All are free and open source.
 
 ## Folders
 
@@ -55,6 +56,7 @@ python -I docs/design/build_threat_model.py
 python -I docs/design/build_screens.py
 python -I docs/design/build_screen_shots.py
 python -I docs/design/build_screens_doc.py
+python -I docs/design/build_data_model.py
 python -I docs/design/build_report.py
 ```
 

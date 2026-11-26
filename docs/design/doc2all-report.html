@@ -291,7 +291,7 @@ strong{color:var(--head)}
 
   <div class="block">
     <div class="kicker">Contents</div>
-    <ul class="contents"><li><span class="c">1</span><div>Introduction<small>The problem, why security matters, and security in every step of the life cycle</small></div></li><li><span class="c">2</span><div>Objectives<small>The general objective and the specific objectives, in the order the system is built</small></div></li><li><span class="c">3</span><div>Requirements<small>Functional, non-functional and security requirements, abuse cases and traceability</small></div></li><li><span class="c">4</span><div>Design<small>The threat model (data-flow diagram, trust boundaries, threats and protections) and the screens</small></div></li><li><span class="c">5</span><div>Implementation<small>Secure coding rules and the features, built one after another</small></div></li><li><span class="c">6</span><div>Testing<small>One test per abuse case, code, dependency and dynamic scans, fixes and retests</small></div></li><li><span class="c">7</span><div>Deployment<small>The hardening checklist for going live</small></div></li><li><span class="c">8</span><div>Maintenance<small>The audit log, the update routine and the incident-response note</small></div></li><li><span class="c">9</span><div>Conclusion<small>What was built, what was found and fixed, and what comes next</small></div></li><li><span class="c">R</span><div>References<small>The sources used</small></div></li></ul>
+    <ul class="contents"><li><span class="c">1</span><div>Introduction<small>The problem, why security matters, and security in every step of the life cycle</small></div></li><li><span class="c">2</span><div>Objectives<small>The general objective and the specific objectives, in the order the system is built</small></div></li><li><span class="c">3</span><div>Requirements<small>Functional, non-functional and security requirements, abuse cases and traceability</small></div></li><li><span class="c">4</span><div>Design<small>The threat model (data-flow diagram, trust boundaries, threats and protections), the screens and the data model</small></div></li><li><span class="c">5</span><div>Implementation<small>Secure coding rules and the features, built one after another</small></div></li><li><span class="c">6</span><div>Testing<small>One test per abuse case, code, dependency and dynamic scans, fixes and retests</small></div></li><li><span class="c">7</span><div>Deployment<small>The hardening checklist for going live</small></div></li><li><span class="c">8</span><div>Maintenance<small>The audit log, the update routine and the incident-response note</small></div></li><li><span class="c">9</span><div>Conclusion<small>What was built, what was found and fixed, and what comes next</small></div></li><li><span class="c">R</span><div>References<small>The sources used</small></div></li></ul>
   </div>
 
   <div class="block">
@@ -440,7 +440,7 @@ strong{color:var(--head)}
 </tr>
 <tr>
 <td class="idc"><span class="pill">FR-08</span></td>
-<td>A user can see the history of their own files and delete any of them.</td>
+<td>A user can see the history of their own files, delete any file and remove entries from the history.</td>
 </tr>
 <tr>
 <td class="idc"><span class="pill">FR-09</span></td>
@@ -651,7 +651,7 @@ strong{color:var(--head)}
 </tr>
 <tr>
 <td class="idc"><span class="pill">SR-29</span></td>
-<td>A change to the password, email or passkeys, and a sign-in on a new device, is pinned in the app until the user answers it and is also sent by email, to the address the account had before the change. A deleted account is confirmed by email. Notices about files stay in the app.</td>
+<td>A change to the password, email or passkeys, and a sign-in on a new device, is pinned in the app until the user answers it and is also sent by email, to the address the account had before the change. A deleted account is confirmed by email. Notices about files stay in the app. A device is recognised by a random value in a cookie, and the server keeps only its hash.</td>
 <td>Add a passkey: the notice is pinned and an email arrives. Change the email: the old address is told. Finish a job: no email is sent.</td>
 </tr>
 </tbody>
@@ -678,8 +678,8 @@ strong{color:var(--head)}
 </tr>
 <tr>
 <td class="idc"><span class="pill">SR-06</span></td>
-<td>Roles: user and administrator. An administrator sees records and the audit log but not document contents.</td>
-<td>Log in as administrator and try to open a document: refused.</td>
+<td>Roles: user and administrator. An administrator sees records and the audit log, with ids, but not file names or document contents.</td>
+<td>Log in as administrator and try to open a document: refused. The records show no file name.</td>
 </tr>
 <tr>
 <td class="idc"><span class="pill">SR-07</span></td>
@@ -774,7 +774,7 @@ strong{color:var(--head)}
 </tr>
 <tr>
 <td class="idc"><span class="pill">SR-18</span></td>
-<td>Files and results are deleted after <strong>24 hours</strong> by default, or at once when the user asks. Each deletion is logged and shown in the report. Deleting an account removes its files, passkeys and sessions at once; the audit log keeps its entries under a random user id, without the name or email.</td>
+<td>Files and results are deleted after <strong>24 hours</strong> by default, or at once when the user asks. Each deletion is logged and shown in the report. The history keeps the file name and the result until the user removes them. Deleting an account removes its files, passkeys and sessions at once; the audit log keeps its entries under a random user id, without the name or email.</td>
 <td>Create a file, wait or force the time: file is gone, log entry exists. Delete an account: nothing of it is left, and its log entries hold no name or email.</td>
 </tr>
 <tr>
@@ -796,8 +796,8 @@ strong{color:var(--head)}
 <tbody>
 <tr>
 <td class="idc"><span class="pill">SR-20</span></td>
-<td>An audit log records sign-in, upload, each processing step, download and deletion, with user, time and result. Users cannot change or delete it.</td>
-<td>Do each action; find the entry. Try to edit it as a user: refused.</td>
+<td>An audit log records sign-in, upload, each processing step, download and deletion, with user, time and result. Users cannot change or delete it, and the application can only add to it and read it. Each line carries a fingerprint of the line before, made with a server secret, so a changed line shows.</td>
+<td>Do each action; find the entry. Try to edit it as a user and as the application: refused. Change a line directly in the database: the check reports it.</td>
 </tr>
 <tr>
 <td class="idc"><span class="pill">SR-21</span></td>
@@ -1311,7 +1311,7 @@ strong{color:var(--head)}
 <tr>
 <td>Database<br>I, E</td>
 <td>User A opens user B's record by changing an id. An administrator reads documents.</td>
-<td>Owner check on every request, with "not found" for others. Administrators see records, never contents.</td>
+<td>Owner check on every request, with "not found" for others. Administrators see records and ids, never file names or contents.</td>
 <td><span class="tag">SR-04</span> <span class="tag">SR-06</span> <span class="tag">AC-02</span> <span class="tag">AC-10</span></td>
 </tr>
 <tr>
@@ -1353,7 +1353,7 @@ strong{color:var(--head)}
 <tr>
 <td>Step 10 · Audit log<br>T, R, I</td>
 <td>A log line is edited or deleted. Document text leaks into the logs.</td>
-<td>Users cannot change the log. Logs and error messages never hold document content.</td>
+<td>Users cannot change the log, the application can only add to it, and a changed line shows. Logs and error messages never hold document content.</td>
 <td><span class="tag">SR-19</span> <span class="tag">SR-20</span> <span class="tag">AC-11</span></td>
 </tr>
 </tbody>
@@ -1366,7 +1366,148 @@ strong{color:var(--head)}
 <p>The screens show how a person meets these protections. Figure 4.2 maps all eleven, and the six that carry the most security decisions follow at full size, in light mode on a computer. The design also fits a phone about 400 px wide (NFR-06).</p><div class="smap"><div class="sgrp" style="grid-column:span 4"><div class="sgrp-t">Getting in</div><div class="srow" style="grid-template-columns:repeat(4,minmax(0,1fr))"><figure><img src="shots/map-1.png" alt="Screen 1, Sign-in"><figcaption><b>1</b> Sign-in</figcaption></figure><figure><img src="shots/map-2.png" alt="Screen 2, Create account"><figcaption><b>2</b> Create account</figcaption></figure><figure><img src="shots/map-3.png" alt="Screen 3, Second step"><figcaption><b>3</b> Second step</figcaption></figure><figure><img src="shots/map-4.png" alt="Screen 4, Forgot password"><figcaption><b>4</b> Forgot password</figcaption></figure></div></div><div class="sgrp" style="grid-column:span 3"><div class="sgrp-t">Doing the work</div><div class="srow" style="grid-template-columns:repeat(3,minmax(0,1fr))"><figure><img src="shots/map-5.png" alt="Screen 5, Upload and choose"><figcaption><b>5</b> Upload and choose</figcaption></figure><figure><img src="shots/map-6.png" alt="Screen 6, Consent for outside OCR"><figcaption><b>6</b> Consent for outside OCR</figcaption></figure><figure><img src="shots/map-7.png" alt="Screen 7, Safety report"><figcaption><b>7</b> Safety report</figcaption></figure></div></div><div class="sgrp" style="grid-column:span 1"><div class="sgrp-t">Admin</div><div class="srow" style="grid-template-columns:repeat(1,minmax(0,1fr))"><figure><img src="shots/map-11.png" alt="Screen 11, Audit log (admin)"><figcaption><b>11</b> Audit log (admin)</figcaption></figure></div></div><div class="sgrp" style="grid-column:span 3"><div class="sgrp-t">Looking after files</div><div class="srow" style="grid-template-columns:repeat(3,minmax(0,1fr))"><figure><img src="shots/map-8.png" alt="Screen 8, History"><figcaption><b>8</b> History</figcaption></figure><figure><img src="shots/map-9.png" alt="Screen 9, Delete confirmation"><figcaption><b>9</b> Delete confirmation</figcaption></figure><figure><img src="shots/map-10.png" alt="Screen 10, Settings"><figcaption><b>10</b> Settings</figcaption></figure></div></div></div><p class="mapcap">Figure 4.2 · The eleven screens</p></section>
 
 <article class="paper doc">
-  <div class="block"><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 1</span>Sign-in</div><img src="shots/screen-1.png" alt="Screen 1, Sign-in" style="--pw:90.9%"><figcaption><b>Figure 4.3</b> A wrong email and a wrong password give the same message. Five wrong tries lock the account for 15 minutes.<div><span class="tag">SR-01</span> <span class="tag">SR-02</span> <span class="tag">SR-21</span> <span class="tag">AC-07</span></div></figcaption></figure><figure class="shot"><div class="shot-t"><span class="n">Screen 3</span>Second step</div><img src="shots/screen-3.png" alt="Screen 3, Second step" style="--pw:90.9%"><figcaption><b>Figure 4.4</b> A password is never enough. The passkey is the first choice, and a code by email is the other.<div><span class="tag">FR-11</span> <span class="tag">SR-27</span> <span class="tag">SR-28</span> <span class="tag">AC-14</span> <span class="tag">AC-16</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 5</span>Clean options</div><img src="shots/screen-5.png" alt="Screen 5, Clean options" style="--pw:100.0%"><figcaption><b>Figure 4.5</b> The user sees what was found. What runs by itself is always removed, and the user chooses the rest.<div><span class="tag">FR-05</span> <span class="tag">SR-15</span> <span class="tag">AC-17</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 7</span>Safety report</div><img src="shots/screen-7.png" alt="Screen 7, Safety report" style="--pw:76.9%"><figcaption><b>Figure 4.6</b> Each finding says what it means and what was done, and when the file is deleted.<div><span class="tag">FR-07</span> <span class="tag">SR-15</span> <span class="tag">SR-18</span> <span class="tag">NFR-02</span></div></figcaption></figure><figure class="shot"><div class="shot-t"><span class="n">Screen 8</span>History</div><img src="shots/screen-8.png" alt="Screen 8, History" style="--pw:76.9%"><figcaption><b>Figure 4.7</b> Only the owner's files are listed. A security notice stays pinned until the user answers it.<div><span class="tag">FR-08</span> <span class="tag">SR-04</span> <span class="tag">SR-18</span> <span class="tag">SR-29</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 11</span>Audit log (administrator)</div><img src="shots/screen-11.png" alt="Screen 11, Audit log (administrator)" style="--pw:100.0%"><figcaption><b>Figure 4.8</b> An administrator sees who did what and when, never the content of a document.<div><span class="tag">SR-06</span> <span class="tag">SR-19</span> <span class="tag">SR-20</span> <span class="tag">AC-10</span></div></figcaption></figure></div></div>
+  <div class="block"><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 1</span>Sign-in</div><img src="shots/screen-1.png" alt="Screen 1, Sign-in" style="--pw:90.9%"><figcaption><b>Figure 4.3</b> A wrong email and a wrong password give the same message. Five wrong tries lock the account for 15 minutes.<div><span class="tag">SR-01</span> <span class="tag">SR-02</span> <span class="tag">SR-21</span> <span class="tag">AC-07</span></div></figcaption></figure><figure class="shot"><div class="shot-t"><span class="n">Screen 3</span>Second step</div><img src="shots/screen-3.png" alt="Screen 3, Second step" style="--pw:90.9%"><figcaption><b>Figure 4.4</b> A password is never enough. The passkey is the first choice, and a code by email is the other.<div><span class="tag">FR-11</span> <span class="tag">SR-27</span> <span class="tag">SR-28</span> <span class="tag">AC-14</span> <span class="tag">AC-16</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 5</span>Clean options</div><img src="shots/screen-5.png" alt="Screen 5, Clean options" style="--pw:100.0%"><figcaption><b>Figure 4.5</b> The user sees what was found. What runs by itself is always removed, and the user chooses the rest.<div><span class="tag">FR-05</span> <span class="tag">SR-15</span> <span class="tag">AC-17</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 7</span>Safety report</div><img src="shots/screen-7.png" alt="Screen 7, Safety report" style="--pw:74.6%"><figcaption><b>Figure 4.6</b> Each finding says what it means and what was done, and when the file is deleted.<div><span class="tag">FR-07</span> <span class="tag">SR-15</span> <span class="tag">SR-18</span> <span class="tag">NFR-02</span></div></figcaption></figure><figure class="shot"><div class="shot-t"><span class="n">Screen 8</span>History</div><img src="shots/screen-8.png" alt="Screen 8, History" style="--pw:74.6%"><figcaption><b>Figure 4.7</b> Only the owner's files are listed. A security notice stays pinned until the user answers it.<div><span class="tag">FR-08</span> <span class="tag">SR-04</span> <span class="tag">SR-18</span> <span class="tag">SR-29</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 11</span>Audit log (administrator)</div><img src="shots/screen-11.png" alt="Screen 11, Audit log (administrator)" style="--pw:100.0%"><figcaption><b>Figure 4.8</b> An administrator sees who did what and when, never the content of a document.<div><span class="tag">SR-06</span> <span class="tag">SR-19</span> <span class="tag">SR-20</span> <span class="tag">AC-10</span></div></figcaption></figure></div></div>
+</article>
+
+<section class="paper land"><h3><span class="n">4.7</span>Data model</h3>
+<p>Figure 4.9 shows what Doc2All saves and how the pieces connect. The records are kept in a PostgreSQL database. File contents are kept in a private folder outside it.</p><style>
+.dm{margin:6px 0 0;text-align:center}.dm svg{display:block;width:100%;height:auto;margin:0 auto;font-family:"DM Sans",sans-serif}
+.dm .face{stroke-width:2.2}.dm .lip{stroke:none}
+.dm .account .face{fill:#EAF1FF;stroke:#2F6BFF}.dm .account .lip{fill:#2F6BFF}
+.dm .work .face{fill:#DDF4F9;stroke:#0E8DA6}.dm .work .lip{fill:#0E8DA6}
+.dm .limit .face{fill:#FFF0DE;stroke:#DB7C2B}.dm .limit .lip{fill:#DB7C2B}
+.dm .log .face{fill:#E9E7FB;stroke:#6B5FD3}.dm .log .lip{fill:#6B5FD3}
+.dm .tt{font-size:17px;font-weight:800;fill:#14305C}.dm text.sub{font-size:13px;font-weight:500;fill:#586C90;margin:0}
+.dm .ln{fill:none;stroke:#14305C;stroke-width:2}.dm .ln.loose{stroke-dasharray:7 6;stroke:#6B5FD3}.dm .mk{fill:#14305C}
+.dm .lb{font-size:12.5px;font-weight:700;fill:#586C90}
+.dm figcaption{font-size:12.5px;color:#7A879E;margin-top:8px}
+@media print{.dm svg{width:auto;height:136mm;max-width:100%}.dm figcaption{font-size:9pt;margin-top:2mm}}
+</style><figure class="dm"><svg viewBox="0 0 1120 600" role="img" aria-label="Users sit in the middle. Account tables hang on the left. A user owns files, a job works on a file and ends with a report and its findings. The audit log keeps only the user id."><defs><marker id="dm-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0 1L9.5 5L0 9z"/></marker></defs><path class="ln" d="M350 185 H325 V55 H222" marker-end="url(#dm-a)"/><text class="lb" x="265" y="47" text-anchor="middle">has</text><path class="ln" d="M350 205 H310 V175 H222" marker-end="url(#dm-a)"/><text class="lb" x="265" y="167" text-anchor="middle">asks for</text><path class="ln" d="M350 235 H310 V295 H222" marker-end="url(#dm-a)"/><text class="lb" x="265" y="287" text-anchor="middle">signs in</text><path class="ln" d="M350 260 H325 V405 H222" marker-end="url(#dm-a)"/><text class="lb" x="265" y="397" text-anchor="middle">uses</text><path class="ln" d="M450 258 V368" marker-end="url(#dm-a)"/><text class="lb" x="458" y="320" text-anchor="start">receives</text><path class="ln" d="M550 190 H605 V75 H658" marker-end="url(#dm-a)"/><text class="lb" x="612" y="100" text-anchor="start">owns</text><path class="ln" d="M730 130 V188" marker-end="url(#dm-a)"/><text class="lb" x="722" y="164" text-anchor="end">is worked on</text><path class="ln" d="M800 190 V132" marker-end="url(#dm-a)"/><text class="lb" x="808" y="164" text-anchor="start">makes results</text><path class="ln" d="M760 280 V338" marker-end="url(#dm-a)"/><text class="lb" x="768" y="314" text-anchor="start">ends with</text><path class="ln" d="M860 375 H928" marker-end="url(#dm-a)"/><text class="lb" x="894" y="367" text-anchor="middle">lists</text><path class="ln loose" d="M590 258 V508" marker-end="url(#dm-a)"/><text class="lb" x="598" y="475">writes lines, id only</text><path class="ln" d="M550 258 H590"/><g class="bx account" data-a="stays" data-b="removed"><rect class="lip" x="20" y="25" width="200" height="71" rx="16"/><rect class="face" x="20" y="20" width="200" height="71" rx="16"/><text class="tt" x="36" y="48">Passkeys</text><text class="sub" x="36" y="70">public key only</text></g><g class="bx account" data-a="removed" data-b="removed"><rect class="lip" x="20" y="135" width="200" height="90" rx="16"/><rect class="face" x="20" y="130" width="200" height="90" rx="16"/><text class="tt" x="36" y="158">One-time codes</text><text class="sub" x="36" y="180">saved as a hash</text><text class="sub" x="36" y="199">10 minutes, one use</text></g><g class="bx account" data-a="removed" data-b="removed"><rect class="lip" x="20" y="265" width="200" height="71" rx="16"/><rect class="face" x="20" y="260" width="200" height="71" rx="16"/><text class="tt" x="36" y="288">Sessions</text><text class="sub" x="36" y="310">30 minutes idle</text></g><g class="bx account" data-a="stays" data-b="removed"><rect class="lip" x="20" y="375" width="200" height="71" rx="16"/><rect class="face" x="20" y="370" width="200" height="71" rx="16"/><text class="tt" x="36" y="398">Known devices</text><text class="sub" x="36" y="420">saved as a hash</text></g><g class="bx account" data-a="stays" data-b="removed"><rect class="lip" x="350" y="165" width="200" height="109" rx="16"/><rect class="face" x="350" y="160" width="200" height="109" rx="16"/><text class="tt" x="366" y="188">Users</text><text class="sub" x="366" y="210">password as a hash</text><text class="sub" x="366" y="229">role</text><text class="sub" x="366" y="248">settings</text></g><g class="bx limit" data-a="removed" data-b="stays 24 h"><rect class="lip" x="350" y="25" width="200" height="71" rx="16"/><rect class="face" x="350" y="20" width="200" height="71" rx="16"/><text class="tt" x="366" y="48">Attempt counters</text><text class="sub" x="366" y="70">limits on tries</text></g><g class="bx account" data-a="stays" data-b="removed"><rect class="lip" x="350" y="375" width="200" height="71" rx="16"/><rect class="face" x="350" y="370" width="200" height="71" rx="16"/><text class="tt" x="366" y="398">Notices</text><text class="sub" x="366" y="420">pinned if security</text></g><g class="bx work" data-a="content removed" data-b="removed"><rect class="lip" x="660" y="45" width="200" height="90" rx="16"/><rect class="face" x="660" y="40" width="200" height="90" rx="16"/><text class="tt" x="676" y="68">Files</text><text class="sub" x="676" y="90">random id, owner</text><text class="sub" x="676" y="109">24 hours</text></g><g class="bx work" data-a="stays" data-b="removed"><rect class="lip" x="660" y="195" width="200" height="90" rx="16"/><rect class="face" x="660" y="190" width="200" height="90" rx="16"/><text class="tt" x="676" y="218">Jobs</text><text class="sub" x="676" y="240">sandbox work</text><text class="sub" x="676" y="259">choices, consent</text></g><g class="bx work" data-a="stays" data-b="removed"><rect class="lip" x="660" y="345" width="200" height="71" rx="16"/><rect class="face" x="660" y="340" width="200" height="71" rx="16"/><text class="tt" x="676" y="368">Safety reports</text><text class="sub" x="676" y="390">result</text></g><g class="bx work" data-a="stays" data-b="removed"><rect class="lip" x="930" y="345" width="170" height="71" rx="16"/><rect class="face" x="930" y="340" width="170" height="71" rx="16"/><text class="tt" x="946" y="368">Findings</text><text class="sub" x="946" y="390">counts, no values</text></g><g class="bx log" data-a="stays" data-b="stays"><rect class="lip" x="20" y="515" width="1080" height="70" rx="16"/><rect class="face" x="20" y="510" width="1080" height="70" rx="16"/><text class="tt" x="36" y="538">Audit log</text><text class="sub" x="36" y="560">only added, never edited  ·  user id only  ·  no name, no email, no file name</text></g></svg><figcaption>Figure 4.9 · What Doc2All saves and how it connects</figcaption></figure></section>
+
+<article class="paper doc">
+  <div class="block"><div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>What it saves</th>
+<th>What protects it</th>
+<th>Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Users</td>
+<td>Email, role, settings, password hash</td>
+<td>Only a slow, salted hash of the password</td>
+<td><span class="tag">SR-01</span> <span class="tag">SR-06</span> <span class="tag">SR-27</span></td>
+</tr>
+<tr>
+<td>Passkeys</td>
+<td>Public key, name, dates</td>
+<td>The private key never leaves the device</td>
+<td class="idc"><span class="pill">SR-28</span></td>
+</tr>
+<tr>
+<td>One-time codes</td>
+<td>Purpose, expiry, wrong tries</td>
+<td>Only a hash of the code, made with a server secret</td>
+<td><span class="tag">SR-25</span> <span class="tag">SR-26</span></td>
+</tr>
+<tr>
+<td>Sessions</td>
+<td>Who is signed in, second step, last activity</td>
+<td>Random key in an HTTP-only cookie, ends after 30 minutes idle</td>
+<td><span class="tag">SR-03</span> <span class="tag">SR-27</span></td>
+</tr>
+<tr>
+<td>Known devices</td>
+<td>Device name, first and last use</td>
+<td>Only a hash of the random cookie value</td>
+<td class="idc"><span class="pill">SR-29</span></td>
+</tr>
+<tr>
+<td>Attempt counters</td>
+<td>Sign-ins, codes sent, uploads</td>
+<td>Hashed email or address, removed after 24 hours</td>
+<td><span class="tag">SR-02</span> <span class="tag">SR-09</span> <span class="tag">SR-25</span></td>
+</tr>
+<tr>
+<td>Files</td>
+<td>Name, type, size, deletion time</td>
+<td>Random id, owner check, random name on disk</td>
+<td><span class="tag">SR-04</span> <span class="tag">SR-05</span> <span class="tag">SR-10</span> <span class="tag">SR-18</span></td>
+</tr>
+<tr>
+<td>Jobs</td>
+<td>Action, choices, consent, status</td>
+<td>Owner check, error codes without content</td>
+<td><span class="tag">SR-12</span> <span class="tag">SR-15</span> <span class="tag">SR-17</span></td>
+</tr>
+<tr>
+<td>Safety reports</td>
+<td>Result of a job</td>
+<td>Reached only through the job's owner</td>
+<td><span class="tag">SR-04</span> <span class="tag">SR-15</span></td>
+</tr>
+<tr>
+<td>Findings</td>
+<td>Kind, how many, what was done</td>
+<td>The value that was found is never saved</td>
+<td><span class="tag">SR-15</span> <span class="tag">SR-19</span></td>
+</tr>
+<tr>
+<td>Notices</td>
+<td>Kind, pinned, answered</td>
+<td>Shown only to their owner</td>
+<td class="idc"><span class="pill">SR-29</span></td>
+</tr>
+<tr>
+<td>Audit log</td>
+<td>Time, user id, action, target id, result</td>
+<td>Only added to, each line fingerprints the one before, no name, email or file name</td>
+<td><span class="tag">SR-19</span> <span class="tag">SR-20</span></td>
+</tr>
+</tbody>
+</table></div>
+<p>The application's database account can read and write these tables, but on the audit log it can only add and read. A separate setup account creates and changes the tables and is not used while the application runs. The sandbox runner has no database access.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Removed when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File contents (uploads and results)</td>
+<td>After 24 hours, or at once when the user deletes the file</td>
+</tr>
+<tr>
+<td>File records, jobs, reports, findings</td>
+<td>The user removes them from the history, or deletes the account</td>
+</tr>
+<tr>
+<td>One-time codes</td>
+<td>They are used, or 10 minutes pass</td>
+</tr>
+<tr>
+<td>Sessions</td>
+<td>The user signs out, or 30 minutes pass without activity</td>
+</tr>
+<tr>
+<td>Attempt counters</td>
+<td>After 24 hours</td>
+</tr>
+<tr>
+<td>Users, passkeys, known devices, notices</td>
+<td>The account is deleted</td>
+</tr>
+<tr>
+<td>Audit log</td>
+<td>It stays, without any name, email, file name or content</td>
+</tr>
+</tbody>
+</table></div></div>
 
   <div class="block">
     <div class="kicker">References</div>

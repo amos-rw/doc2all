@@ -74,7 +74,7 @@ The objectives follow the order in which the system is built.
 | FR-05 | Clean: remove content that can run, and private details such as author data and photo locations. The user sees what was found and chooses what to keep. Content that runs by itself or reaches outside is always removed. |
 | FR-06 | Black out personal data: find ID numbers, emails and phone numbers and remove them from the file. |
 | FR-07 | Safety report for each file: what was found, what was removed, when the file is deleted. |
-| FR-08 | A user can see the history of their own files and delete any of them. |
+| FR-08 | A user can see the history of their own files, delete any file and remove entries from the history. |
 | FR-09 | Email check: when a person registers, a one-time code (OTP) sent to their email confirms the address. |
 | FR-10 | Forgot password: a one-time code sent to the user's email lets them choose a new password. |
 | FR-11 | Second step at sign-in: after the password, the user proves it is them with a passkey or a one-time code sent to their email. A user can add and remove passkeys. |
@@ -137,7 +137,7 @@ Each requirement says how it is checked. The values in **bold** are the limits t
 | SR-26 | Forgot password: the answer is the same whether or not the email has an account. A reset needs the emailed code and, when the account has a second step, that step too. After a reset all sessions end and the user is told by email. | Ask for a reset with a known and an unknown email: same answer. Reset, then use the old session: rejected. |
 | SR-27 | Every sign-in needs a second step after the password: a passkey or a one-time code. Passkeys are preferred. Changing the password, the email or the passkeys, or deleting the account, needs the second step again. | Sign in with the password only: no access. Change the email or delete the account without the second step: refused. |
 | SR-28 | Passkeys use WebAuthn. The server stores only the public key, each sign-in uses a new random challenge that works once, and a passkey works only on the Doc2All domain. A user can have several passkeys, and the last second step cannot be removed. | Replay an old sign-in response: refused. Use the passkey on another domain: refused. |
-| SR-29 | A change to the password, email or passkeys, and a sign-in on a new device, is pinned in the app until the user answers it and is also sent by email, to the address the account had before the change. A deleted account is confirmed by email. Notices about files stay in the app. | Add a passkey: the notice is pinned and an email arrives. Change the email: the old address is told. Finish a job: no email is sent. |
+| SR-29 | A change to the password, email or passkeys, and a sign-in on a new device, is pinned in the app until the user answers it and is also sent by email, to the address the account had before the change. A deleted account is confirmed by email. Notices about files stay in the app. A device is recognised by a random value in a cookie, and the server keeps only its hash. | Add a passkey: the notice is pinned and an email arrives. Change the email: the old address is told. Finish a job: no email is sent. |
 
 **Access control**
 
@@ -145,7 +145,7 @@ Each requirement says how it is checked. The values in **bold** are the limits t
 | --- | --- | --- |
 | SR-04 | Every request for a file, result, report or history entry checks that the signed-in user owns it. The answer for someone else's item is "not found". | Log in as user B and request user A's item by id: refused. |
 | SR-05 | File and job ids are random and not guessable (at least **128 bits**). | Check the id generator; sample ids show no pattern. |
-| SR-06 | Roles: user and administrator. An administrator sees records and the audit log but not document contents. | Log in as administrator and try to open a document: refused. |
+| SR-06 | Roles: user and administrator. An administrator sees records and the audit log, with ids, but not file names or document contents. | Log in as administrator and try to open a document: refused. The records show no file name. |
 | SR-07 | Every page and API call needs a signed-in user, except sign-in, registration, forgot password and the Privacy, Cookies and About pages. | Call every other address without signing in: refused. |
 
 **Upload and storage**
@@ -172,14 +172,14 @@ Each requirement says how it is checked. The values in **bold** are the limits t
 | ID | Requirement | How it is checked |
 | --- | --- | --- |
 | SR-17 | OCR runs on our server. Sending document text to any outside service needs the user's clear consent for that file. The email service receives only codes and notices, never document content or file names. | Watch network traffic during OCR: no outside call by default. Read a sent email: a code or notice only. |
-| SR-18 | Files and results are deleted after **24 hours** by default, or at once when the user asks. Each deletion is logged and shown in the report. Deleting an account removes its files, passkeys and sessions at once; the audit log keeps its entries under a random user id, without the name or email. | Create a file, wait or force the time: file is gone, log entry exists. Delete an account: nothing of it is left, and its log entries hold no name or email. |
+| SR-18 | Files and results are deleted after **24 hours** by default, or at once when the user asks. Each deletion is logged and shown in the report. The history keeps the file name and the result until the user removes them. Deleting an account removes its files, passkeys and sessions at once; the audit log keeps its entries under a random user id, without the name or email. | Create a file, wait or force the time: file is gone, log entry exists. Delete an account: nothing of it is left, and its log entries hold no name or email. |
 | SR-19 | Logs and error messages never contain document content. | Search the logs after a test run for words from a sample file: none. |
 
 **Accountability and platform**
 
 | ID | Requirement | How it is checked |
 | --- | --- | --- |
-| SR-20 | An audit log records sign-in, upload, each processing step, download and deletion, with user, time and result. Users cannot change or delete it. | Do each action; find the entry. Try to edit it as a user: refused. |
+| SR-20 | An audit log records sign-in, upload, each processing step, download and deletion, with user, time and result. Users cannot change or delete it, and the application can only add to it and read it. Each line carries a fingerprint of the line before, made with a server secret, so a changed line shows. | Do each action; find the entry. Try to edit it as a user and as the application: refused. Change a line directly in the database: the check reports it. |
 | SR-21 | The site works over HTTPS only and sends security headers (content policy, no framing, no content-type guessing). | Run a header check on the deployed site. |
 | SR-22 | Secrets (keys, passwords) are not in the code or the repository; they come from environment variables. | Run a secret scan over the repository: none found. |
 | SR-23 | Debug mode is off in deployment, and errors shown to users reveal no internal details. | Trigger an error on the deployed site: a plain message only. |
@@ -279,14 +279,14 @@ Each row names a part of the diagram, the threats there, the protection, and the
 | Step 3 · Upload gate<br>D | A zip or Office bomb, or a flood of uploads, uses up the server. | 20 MB, 100 pages, 20 uploads an hour. Files that expand over 100 times are rejected before opening. | SR-09, SR-14, AC-05, AC-09 |
 | Step 4 · Private files<br>I | A guessed link or a direct address shows someone a file. | Random 128-bit ids. A private folder the web server does not serve. Downloads only through the owner check. | SR-05, SR-10, SR-11, AC-01 |
 | Step 9 · Deletion timer<br>I | Files stay longer than needed. | Deleted after 24 hours, or at once on request. Each deletion is logged and shown in the report. | SR-18, AC-11 |
-| Database<br>I, E | User A opens user B's record by changing an id. An administrator reads documents. | Owner check on every request, with "not found" for others. Administrators see records, never contents. | SR-04, SR-06, AC-02, AC-10 |
+| Database<br>I, E | User A opens user B's record by changing an id. An administrator reads documents. | Owner check on every request, with "not found" for others. Administrators see records and ids, never file names or contents. | SR-04, SR-06, AC-02, AC-10 |
 | Job manager<br>I, R | Another user's report or result is opened. A step happens with no record. | Owner check before every report or download. Each step goes to the audit log. | SR-04, SR-20, AC-02 |
 | Steps 5 and 7 · Into and out of the sandbox<br>T, E | A crafted file attacks the converter and tries to reach the rest of the server. | The runner gets a job id and a copy in a throwaway folder. It returns only findings and a result, and never touches the database. | SR-12, SR-13, AC-06 |
 | Step 5 · Runner (sandbox)<br>D, E, T | An endless document. Code running as administrator. Macros or personal text that survive. | 60 second and memory limits. A non-administrator account. The cleaned file is scanned again. Blacked-out text is removed from the file. | SR-12, SR-13, SR-15, SR-16, AC-05, AC-06, AC-12 |
 | Step 5 · Cleaning choices<br>T, E | A harmful script stays in a file because the user chose to keep it, or the report calls such a file clean. | Content that runs by itself is always removed. Other active content is removed unless the user keeps it, and then the report says so and never shows all clear. | SR-15, AC-17 |
 | Step 6 · Outside OCR<br>I | Personal text leaves our system. | OCR runs on our server. An outside service is used only with the user's clear consent for that file. | SR-17 |
 | Step 8 · Report and download<br>I | A stranger or another user downloads a file. | Signed-in request, owner check, random ids. HTTPS with security headers. | SR-04, SR-11, SR-21, AC-01, AC-02 |
-| Step 10 · Audit log<br>T, R, I | A log line is edited or deleted. Document text leaks into the logs. | Users cannot change the log. Logs and error messages never hold document content. | SR-19, SR-20, AC-11 |
+| Step 10 · Audit log<br>T, R, I | A log line is edited or deleted. Document text leaks into the logs. | Users cannot change the log, the application can only add to it, and a changed line shows. Logs and error messages never hold document content. | SR-19, SR-20, AC-11 |
 
 All 18 abuse cases and 26 of the 29 security requirements are placed in this table. SR-22, SR-23 and SR-24 (secrets, debug mode and scans) apply to the whole build and release, so they are handled in sections 5, 6 and 7.
 
@@ -304,6 +304,39 @@ The screens show how a person meets these protections. Figure 4.2 maps all eleve
 | 7 | clear | Safety report | Each finding says what it means and what was done, and when the file is deleted. | FR-07, SR-15, SR-18, NFR-02 |
 | 8 | pinned | History | Only the owner's files are listed. A security notice stays pinned until the user answers it. | FR-08, SR-04, SR-18, SR-29 |
 | 11 | record | Audit log (administrator) | An administrator sees who did what and when, never the content of a document. | SR-06, SR-19, SR-20, AC-10 |
+
+### 4.7 Data model
+
+Figure 4.9 shows what Doc2All saves and how the pieces connect. The records are kept in a PostgreSQL database. File contents are kept in a private folder outside it.
+
+<!--DATA-->
+
+| Table | What it saves | What protects it | Requirements |
+| --- | --- | --- | --- |
+| Users | Email, role, settings, password hash | Only a slow, salted hash of the password | SR-01, SR-06, SR-27 |
+| Passkeys | Public key, name, dates | The private key never leaves the device | SR-28 |
+| One-time codes | Purpose, expiry, wrong tries | Only a hash of the code, made with a server secret | SR-25, SR-26 |
+| Sessions | Who is signed in, second step, last activity | Random key in an HTTP-only cookie, ends after 30 minutes idle | SR-03, SR-27 |
+| Known devices | Device name, first and last use | Only a hash of the random cookie value | SR-29 |
+| Attempt counters | Sign-ins, codes sent, uploads | Hashed email or address, removed after 24 hours | SR-02, SR-09, SR-25 |
+| Files | Name, type, size, deletion time | Random id, owner check, random name on disk | SR-04, SR-05, SR-10, SR-18 |
+| Jobs | Action, choices, consent, status | Owner check, error codes without content | SR-12, SR-15, SR-17 |
+| Safety reports | Result of a job | Reached only through the job's owner | SR-04, SR-15 |
+| Findings | Kind, how many, what was done | The value that was found is never saved | SR-15, SR-19 |
+| Notices | Kind, pinned, answered | Shown only to their owner | SR-29 |
+| Audit log | Time, user id, action, target id, result | Only added to, each line fingerprints the one before, no name, email or file name | SR-19, SR-20 |
+
+The application's database account can read and write these tables, but on the audit log it can only add and read. A separate setup account creates and changes the tables and is not used while the application runs. The sandbox runner has no database access.
+
+| Data | Removed when |
+| --- | --- |
+| File contents (uploads and results) | After 24 hours, or at once when the user deletes the file |
+| File records, jobs, reports, findings | The user removes them from the history, or deletes the account |
+| One-time codes | They are used, or 10 minutes pass |
+| Sessions | The user signs out, or 30 minutes pass without activity |
+| Attempt counters | After 24 hours |
+| Users, passkeys, known devices, notices | The account is deleted |
+| Audit log | It stays, without any name, email, file name or content |
 
 ## References
 - Humayun, M., Jhanjhi, N. Z., Almufareh, M. F., & Khalil, M. I. (2022). Security threat and vulnerability assessment and measurement in secure software development. *Computers, Materials & Continua*, 71(3). https://doi.org/10.32604/cmc.2022.019289

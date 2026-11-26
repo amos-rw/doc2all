@@ -9,7 +9,7 @@ Read the [security rules](design/security-rules.md) and the [screens](design/scr
 | Tools | Free to choose for this module. Django and Django REST Framework (server), React with Vite (browser) |
 | Processing | LibreOffice and Tesseract on our server |
 | Reuse | We reuse working code from our earlier project, Cohortly, then add what is missing |
-| Database | To be decided with the data model (report section 4.7) |
+| Database | PostgreSQL, with a limited app account (see the [data model](design/data-model.md)) |
 | Email provider | A local test mail server for development. The deployment provider is not chosen yet |
 
 ## Code to reuse
