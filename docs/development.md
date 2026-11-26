@@ -2,6 +2,7 @@
 
 Read the [security rules](design/security-rules.md), the [screens](design/screens.md), the [data model](design/data-model.md) and the
 [server interfaces](design/server-interfaces.md) next to this. How to run the app is in the [README](../README.md#running-the-app).
+What each call sends and answers is in the [API examples](design/api-examples.md).
 
 ## Decisions
 
@@ -17,9 +18,9 @@ Read the [security rules](design/security-rules.md), the [screens](design/screen
 
 ## How each piece is built
 
-Functionality first, then protection, one piece at a time:
+The pages come first, with demo data. Then the server, functionality first, then protection, one piece at a time:
 
-1. **Make it work.**
+1. **Make it work.** The server answers the calls exactly as the demo server does, so the page needs no change.
 2. **Protect it.** Look at what the piece really exposes. Take its rows from the threat table (report section 4.5) and its
    calls from the [server interfaces](design/server-interfaces.md). That sets how much security the piece needs.
 3. **Test it**, including its abuse cases.
@@ -39,19 +40,29 @@ These cost nothing now and are hard to add later:
 ## Build order
 
 1. Project skeleton. In `backend/` and `frontend/`.
-2. Upload and private storage.
-3. Features, one at a time: convert, clean, scan to text, black out, safety report, history and deletion.
-4. Accounts: register, email code, sign-in, second step, passkeys, forgot password, sessions. Every file then gets an owner,
+2. All pages, working on demo data.
+3. Server: upload and private storage.
+4. Server features, one at a time: convert, clean, scan to text, black out, safety report, history and deletion.
+5. Accounts: register, email code, sign-in, second step, passkeys, forgot password, sessions. Every file then gets an owner,
    the owner check is added, and every call that is not marked open needs a sign-in.
-5. Notices, settings, account deletion, administrator pages, audit log.
-6. Testing: one test per abuse case, `bandit`, `pip-audit`, `npm audit`, OWASP ZAP. Record each finding, fix, retest.
-7. Deployment checklist (PostgreSQL, secrets, HTTPS, debug off) and maintenance plan.
+6. Notices, settings, account deletion, administrator pages, audit log.
+7. Testing: one test per abuse case, `bandit`, `pip-audit`, `npm audit`, OWASP ZAP. Record each finding, fix, retest.
+8. Deployment checklist (PostgreSQL, secrets, HTTPS, debug off) and maintenance plan.
 
-Protections that need an account, such as the owner check and the limit per user, are added in step 4 to the pieces built before it.
+Protections that need an account, such as the owner check and the limit per user, are added in step 5 to the pieces built before it.
+
+## Pages and demo server
+
+- The pages talk to the server only through `frontend/src/api/calls.js`: the 41 calls of the design.
+- Demo mode answers them from `frontend/src/api/mock/`, with the design's rules (who may ask, codes, lock-out,
+  confirmation, owner check). It is left out of the build when `VITE_API=server`.
+- The demo rules are **not protection**. Anyone can change what runs in a browser. The server must enforce every rule.
+- `frontend/src/api/passkey.js` pretends. WebAuthn replaces it with the accounts.
+- When a call changes, change the design list, the demo server and `npm test` together.
 
 ## Code to reuse
 
-The copies are kept on the author's computer in `reuse/cohortly/` (not in git). Copy a part into the app, adapt it, test it.
+The pages were written new from the designed screens. The copies are kept on the author's computer in `reuse/cohortly/` (not in git). Copy a part into the app, adapt it, test it.
 Never import from that folder. The report's Implementation section must say which parts came from Cohortly.
 
 | From Cohortly | Use it for | Change before use |

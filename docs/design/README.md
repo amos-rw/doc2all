@@ -10,6 +10,7 @@ Where each design lives. If two documents disagree, the [report text](../02-doc2
 | The cat, colours and type | `doc2all-cat.html` (open in a browser) | the same file | written by hand |
 | Data model | [data-model.md](data-model.md), report section 4.7 | `build_data_model.py` | `build_data_model.py` |
 | Server interfaces | [server-interfaces.md](server-interfaces.md), report section 4.8 | `build_server_interfaces.py` | `build_server_interfaces.py` |
+| What each call sends and answers | [api-examples.md](api-examples.md) | the demo server in `frontend/src/api/mock/` | `npm test` in `frontend/` |
 
 ## Files here
 

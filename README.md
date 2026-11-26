@@ -8,7 +8,7 @@ from a scanned page, and **checks and cleans every file** on the way. It then sh
 It is a project for the module *Application Security Technologies*, to show security at **every step of the software
 development life cycle (SDLC)**.
 
-> Status: requirements and design written. The application skeleton runs; the features are being built.
+> Status: requirements and design written. All pages work with made-up demo data. The server is built next.
 
 ## What it does
 
@@ -43,43 +43,52 @@ processing. All are free and open source.
 
 ## Running the app
 
-Needs Python 3.12 or newer, Node 22.12 or newer, LibreOffice and Tesseract. No keys or passwords are needed on a
-developer's computer. The commands are for Windows PowerShell, from the project folder.
-
-Set up once:
+Needs Node 22.22 or newer. The commands are for Windows PowerShell, from the project folder.
 
 ```
-python -m venv .venv
-.venv\Scripts\python -m pip install -r backend\requirements.txt
 npm.cmd --prefix frontend install
-```
-
-Start the server in one window:
-
-```
-.venv\Scripts\python backend\manage.py runserver 8010
-```
-
-Start the browser part in a second window, then open <http://localhost:5180>:
-
-```
 npm.cmd --prefix frontend run dev
 ```
 
-Run the tests:
+Open <http://localhost:5180>. The pages run on **demo data inside the browser**: no server, keys or passwords are
+needed, and nothing is sent, converted or cleaned.
+
+| Demo sign-in | Value |
+| --- | --- |
+| User | `amos@example.com` |
+| Administrator | `admin@example.com` |
+| Password | `doc2all-demo-pass` |
+| Every emailed code | `123456` |
+
+A passkey is pretended. The **Demo** button in a corner of the page makes time pass, adds a security notice or starts
+the demo again.
+
+Check the demo server against the design (all calls and their access rules):
 
 ```
+npm.cmd --prefix frontend test
+```
+
+### The server
+
+Being built. It needs Python 3.12 or newer, LibreOffice and Tesseract.
+
+```
+python -m venv .venv
+.venv\Scripts\python -m pip install -r backendequirements.txt
+.venv\Scripts\python backend\manage.py runserver 8010
 .venv\Scripts\python backend\manage.py test core
 ```
 
-This is the development mode: only for your own computer. Setting `DJANGO_SECRET_KEY` turns it off.
+This is development mode, only for your own computer. Setting `DJANGO_SECRET_KEY` turns it off. To make the pages use
+the real server instead of the demo data, set `VITE_API` to `server` before starting them.
 
 ## Folders
 
 | Folder | What is in it |
 | --- | --- |
 | `backend/` | The Django server |
-| `frontend/` | The React pages |
+| `frontend/` | The React pages. `src/api/mock/` is the demo server |
 | `docs/` | The report, the designs and the development plan |
 | `docs/design/` | Sources and builders for the diagram, the screens and the report |
 | `samples/public/` | Made-up test documents (never real personal data) |
