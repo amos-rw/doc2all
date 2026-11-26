@@ -75,7 +75,7 @@ Being built. It needs Python 3.12 or newer, LibreOffice and Tesseract.
 
 ```
 python -m venv .venv
-.venv\Scripts\python -m pip install -r backendequirements.txt
+.venv\Scripts\python -m pip install -r backend\requirements.txt
 .venv\Scripts\python backend\manage.py runserver 8010
 .venv\Scripts\python backend\manage.py test core
 ```
