@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { api } from '../api/calls.js'
-import { isDemo } from '../api/client.js'
+import { isDemo, realFiles } from '../api/client.js'
 import { useRefreshNotices } from '../components/Layout.jsx'
 import { Alert, Corner, Dialog, Icon, Pill, Steps, useAction } from '../components/ui.jsx'
 import { playDone, size } from '../lib/helpers.js'
@@ -59,7 +59,8 @@ export default function Tools() {
       try {
         const saved = await api.upload(chosen)
         setFile(saved)
-        setActions(saved.allowed.includes('convert') ? ['convert', 'clean'] : ['scan'])
+        const usual = saved.allowed.includes('convert') ? ['convert', 'clean'] : ['scan']
+        setActions(usual.filter((action) => saved.allowed.includes(action)))
         setView('pick')
         choices.current = {}
       } catch (problem) {
@@ -252,7 +253,9 @@ export default function Tools() {
           }}
         />
       </label>
-      {isDemo && !file && (
+      {realFiles && isDemo && !file && <div className="demohint">Upload and convert are real. Made-up files to try are in the folder samples/public.</div>}
+      {file && file.allowed.length === 0 && <p className="note">I saved this file, but nothing can be done with this kind yet.</p>}
+      {!realFiles && !file && (
         <div className="demohint">
           Demo files:{' '}
           {SAMPLES.map((s) => (
@@ -269,7 +272,7 @@ export default function Tools() {
           return (
             <button key={tool.key} className={on ? 'tool on' : 'tool'} aria-pressed={on} disabled={!file || !possible} onClick={() => toggleAction(tool.key)}>
               {tool.name}
-              <span>{possible ? tool.does(file?.kind) : 'Not for this kind of file'}</span>
+              <span>{possible ? tool.does(file?.kind) : file.soon?.includes(tool.key) ? 'Coming soon' : 'Not for this kind of file'}</span>
             </button>
           )
         })}

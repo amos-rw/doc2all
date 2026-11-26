@@ -11,6 +11,8 @@ const HEAD = {
   clear: { mood: 'safe', title: 'All clear', sub: 'checked, and nothing dangerous is left' },
   kept: { mood: 'hello', title: 'Done, one thing kept', sub: 'check before you share it' },
   alert: { mood: 'alert', title: 'Be careful', sub: 'I could not clean this file' },
+  converted: { mood: 'hello', title: 'Converted', sub: 'not yet checked for hidden content' },
+  failed: { mood: 'alert', title: 'It did not work', sub: 'I could not convert this file' },
 }
 
 export default function Report() {
@@ -38,9 +40,10 @@ export default function Report() {
   if (!report) return <p className="note">Opening the report…</p>
 
   const head = HEAD[report.outcome]
+  const nothingToDownload = report.outcome === 'alert' || report.outcome === 'failed'
   const download = () =>
     run(async () => {
-      const { blob, name } = await api.download(report.fileId)
+      const { blob, name } = await api.download(report.resultId || report.fileId)
       saveBlob(blob, name)
     })
   const saveReport = () => {
@@ -76,14 +79,14 @@ export default function Report() {
       <div className="note center">{report.fileDeleted ? 'This file has been deleted. The report stays until you remove it from History.' : `⏱ Deleted automatically on ${dayAndTime(report.expiresAt)}`}</div>
       {error && <Alert>{error}</Alert>}
       <div className="actc">
-        {!report.fileDeleted && report.outcome === 'alert' && (
+        {!report.fileDeleted && nothingToDownload && (
           <button className="mbtn danger wide" onClick={() => setDialog('delete')}>
             Delete file
           </button>
         )}
-        {!report.fileDeleted && report.outcome !== 'alert' && (
+        {!report.fileDeleted && !nothingToDownload && (
           <button className="mbtn wide" onClick={download} disabled={busy}>
-            Download {report.outcome === 'clear' ? 'clean file' : 'file'}
+            Download {{ clear: 'clean file', converted: 'PDF' }[report.outcome] || 'file'}
           </button>
         )}
         <div className="actr">
@@ -95,7 +98,7 @@ export default function Report() {
           <button className="mbtn sm ghost" onClick={saveReport}>
             Save report
           </button>
-          {!report.fileDeleted && report.outcome !== 'alert' && (
+          {!report.fileDeleted && !nothingToDownload && (
             <button className="mbtn sm ghost danger" onClick={() => setDialog('delete')}>
               Delete now
             </button>

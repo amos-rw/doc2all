@@ -1,8 +1,18 @@
-// Every call to the server goes through here.
-// Demo mode (the default for now) answers from src/api/mock. Start with VITE_API=server to use the real server.
+// Every call to the server goes through here. Three ways to run:
+//   mixed (the usual way while building): the calls the server already has go to it, the rest to src/api/mock
+//   demo  (npm run demo): everything is answered in the browser, no server needed
+//   server (VITE_API=server): everything goes to the server
 import { ApiError } from './errors.js'
 
-export const isDemo = import.meta.env.VITE_API !== 'server'
+const mode = import.meta.env.MODE === 'demo' ? 'demo' : import.meta.env.VITE_API || 'mixed'
+export const isDemo = mode !== 'server' // some data is still made up
+export const realFiles = mode !== 'demo' // upload and convert use the server
+
+// Built on the server so far: upload, convert, report, download, delete and history.
+const BUILT = /^\/api\/(files|jobs|history)(\/[^/]+)?(\/(download|report))?$/
+const useServer = (path) => mode === 'server' || (mode === 'mixed' && BUILT.test(path))
+
+const NO_SERVER = 'The server is not answering. Is it running on port 8010?'
 
 let formToken = ''
 let signedOutListener = () => {}
@@ -24,21 +34,33 @@ async function send(method, path, body) {
     payload = JSON.stringify(body)
   }
   if (method !== 'GET') headers['X-CSRFToken'] = formToken
-  const response = await fetch(path, { method, headers, body: payload, credentials: 'same-origin' })
+  let response
+  try {
+    response = await fetch(path, { method, headers, body: payload, credentials: 'same-origin' })
+  } catch {
+    throw new ApiError(503, 'no_server', NO_SERVER)
+  }
   const isJson = response.headers.get('Content-Type')?.includes('json')
   if (!response.ok) {
     const data = isJson ? await response.json() : {}
-    throw new ApiError(response.status, data.error, data.message || 'Something went wrong.', data)
+    const fallback = response.status >= 500 && !isJson ? NO_SERVER : 'Something went wrong.'
+    throw new ApiError(response.status, data.error, data.message || fallback, data)
   }
   if (isJson) return response.json()
-  const name = /filename="([^"]+)"/.exec(response.headers.get('Content-Disposition') || '')?.[1]
-  return { blob: await response.blob(), name: name || 'download' }
+  return { blob: await response.blob(), name: fileName(response.headers.get('Content-Disposition') || '') }
+}
+
+// Names with letters outside plain English arrive as filename*=utf-8''...
+function fileName(header) {
+  const encoded = /filename\*=utf-8''([^;]+)/i.exec(header)?.[1]
+  if (encoded) return decodeURIComponent(encoded)
+  return /filename="((?:[^"\\]|\\.)*)"/.exec(header)?.[1].replace(/\\(.)/g, '$1') || 'download'
 }
 
 export async function request(method, path, body) {
   try {
     let data
-    if (import.meta.env.VITE_API !== 'server') {
+    if (import.meta.env.VITE_API !== 'server' && !useServer(path)) {
       const server = await import('./mock/server.js')
       await pause(220) // a real server takes a moment
       data = await server.handle(method, path, body)

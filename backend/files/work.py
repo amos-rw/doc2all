@@ -1,0 +1,77 @@
+"""Does a job: copies the file into a throwaway folder, runs the program, keeps the result, writes the report."""
+import logging
+import tempfile
+import threading
+from pathlib import Path, PurePath
+
+from django.conf import settings
+from django.db import connection, transaction
+from django.utils import timezone
+
+from core import tools
+
+from . import storage
+from .models import Finding, Job, Report, StoredFile
+
+log = logging.getLogger(__name__)
+
+
+def start(job):
+    if settings.JOBS_INLINE:
+        run(job.id)
+    else:
+        # In the server process for now. The design puts a separate sandbox runner here.
+        threading.Thread(target=_in_thread, args=(job.id,), daemon=True).start()
+
+
+def _in_thread(job_id):
+    try:
+        run(job_id)
+    finally:
+        connection.close()
+
+
+def _stage(job_id, stage):
+    Job.objects.filter(pk=job_id).update(status=Job.RUNNING, stage=stage)
+
+
+def run(job_id):
+    try:
+        job = Job.objects.select_related("file").get(pk=job_id)
+        source = job.file
+        _stage(job_id, 1)
+        with tempfile.TemporaryDirectory(prefix="doc2all-job-", dir=settings.CONVERTER_WORKDIR or None) as folder:
+            copy = Path(folder) / f"input.{source.kind}"
+            storage.copy_to(source, copy)
+            _stage(job_id, 2)
+            pdf = tools.office_convert(copy, "pdf", folder)
+            _stage(job_id, 3)
+            content = pdf.read_bytes()
+            if not content.startswith(b"%PDF"):
+                raise tools.ToolError("No PDF was made.")
+            _keep(job_id, content)
+    except (Job.DoesNotExist, StoredFile.DoesNotExist):
+        return  # removed from History while we were working
+    except tools.ToolError:
+        _finish(job_id, Job.FAILED, "failed", ["could_not_convert"], error="convert_failed")
+    except Exception:  # anything unexpected still ends the job; the log keeps the details, the user does not see them
+        log.exception("Job %s failed", job_id)
+        _finish(job_id, Job.FAILED, "failed", ["could_not_convert"], error="internal")
+
+
+def _keep(job_id, content):
+    with transaction.atomic():
+        job = Job.objects.select_related("file").get(pk=job_id)
+        if job.file.gone:  # deleted while we were working: keep nothing
+            _finish(job_id, Job.FAILED, "failed", ["deleted_meanwhile"], error="deleted")
+            return
+        name = f"{PurePath(job.file.shown_name).stem[:100]}.pdf"
+        storage.save([content], shown_name=name, kind="pdf", job=job, delete_after=job.file.delete_after)
+        _finish(job_id, Job.DONE, "converted", ["converted", "not_checked"])
+
+
+def _finish(job_id, status, result, kinds, error=""):
+    if not Job.objects.filter(pk=job_id).update(status=status, stage=4, finished_at=timezone.now(), error_code=error):
+        return
+    report, _ = Report.objects.get_or_create(job_id=job_id, defaults={"result": result})
+    Finding.objects.bulk_create(Finding(report=report, kind=kind) for kind in kinds)

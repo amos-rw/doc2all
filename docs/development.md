@@ -51,11 +51,32 @@ These cost nothing now and are hard to add later:
 
 Protections that need an account, such as the owner check and the limit per user, are added in step 5 to the pieces built before it.
 
+## State of each piece
+
+| Piece | Works | Protected and tested |
+| --- | --- | --- |
+| Upload (type from name and first bytes, 20 MB, private folder) | yes | partly |
+| Convert Word and PowerPoint to PDF | yes | not yet |
+| Download, history, delete (24 hours checked when files are used) | yes | not yet |
+| Convert PDF to images, clean, scan to text, black out | not yet | |
+| Accounts, notices, administrator pages | demo data | |
+
+To protect upload and convert next:
+
+- A look inside Office files before opening them, bomb checks and the page limit (SR-09, SR-14).
+- LibreOffice must not run macros or fetch anything from outside while converting (SR-12, SR-15, AC-06).
+- A memory limit, a non-administrator account, and a runner apart from the web server (SR-12, SR-13).
+- A limit on uploads and on jobs at the same time, and refusing a too large request before reading it (SR-09, AC-09).
+- The form token on every change, and download headers (SR-21).
+- A timer that deletes after 24 hours, and the audit log (SR-18, SR-20).
+- The owner check, which arrives with the accounts (SR-04, AC-01, AC-02).
+
 ## Pages and demo server
 
 - The pages talk to the server only through `frontend/src/api/calls.js`: the 41 calls of the design.
-- Demo mode answers them from `frontend/src/api/mock/`, with the design's rules (who may ask, codes, lock-out,
-  confirmation, owner check). It is left out of the build when `VITE_API=server`.
+- While building (the default) the calls the server already has go to it, listed in `frontend/src/api/client.js`. The
+  rest are answered by `frontend/src/api/mock/`, with the design's rules (who may ask, codes, lock-out, confirmation,
+  owner check). `npm run demo` answers everything there; `VITE_API=server` leaves it out of the build.
 - The demo rules are **not protection**. Anyone can change what runs in a browser. The server must enforce every rule.
 - `frontend/src/api/passkey.js` pretends. WebAuthn replaces it with the accounts.
 - When a call changes, change the design list, the demo server and `npm test` together.

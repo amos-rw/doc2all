@@ -8,7 +8,8 @@ from a scanned page, and **checks and cleans every file** on the way. It then sh
 It is a project for the module *Application Security Technologies*, to show security at **every step of the software
 development life cycle (SDLC)**.
 
-> Status: requirements and design written. All pages work with made-up demo data. The server is built next.
+> Status: requirements and design written. All pages work. Upload and convert (Word and PowerPoint to PDF) run on
+> the server; the other pages still use made-up demo data. **Not yet protected: for a developer's own computer only.**
 
 ## What it does
 
@@ -43,15 +44,33 @@ processing. All are free and open source.
 
 ## Running the app
 
-Needs Node 22.22 or newer. The commands are for Windows PowerShell, from the project folder.
+Needs Python 3.12 or newer, Node 22.22 or newer, LibreOffice and Tesseract. No keys or passwords are needed on a
+developer's computer. The commands are for Windows PowerShell, from the project folder.
+
+Set up once:
 
 ```
+python -m venv .venv
+.venv\Scripts\python -m pip install -r backend\requirements.txt
+.venv\Scripts\python backend\manage.py migrate
+.venv\Scripts\python backend\manage.py check_tools
 npm.cmd --prefix frontend install
+```
+
+Start the server in one window:
+
+```
+.venv\Scripts\python backend\manage.py runserver 8010
+```
+
+Start the pages in a second window, then open <http://localhost:5180>:
+
+```
 npm.cmd --prefix frontend run dev
 ```
 
-Open <http://localhost:5180>. The pages run on **demo data inside the browser**: no server, keys or passwords are
-needed, and nothing is sent, converted or cleaned.
+Upload and convert use the server; try them with the made-up files in `samples/public/`. Everything else is demo data
+inside the browser.
 
 | Demo sign-in | Value |
 | --- | --- |
@@ -63,35 +82,22 @@ needed, and nothing is sent, converted or cleaned.
 A passkey is pretended. The **Demo** button in a corner of the page makes time pass, adds a security notice or starts
 the demo again.
 
-Check the demo server against the design (all calls and their access rules):
+| To | Run |
+| --- | --- |
+| See every page without the server | `npm.cmd --prefix frontend run demo` |
+| Use only the real server | set `VITE_API` to `server` before starting the pages |
+| Test the server | `.venv\Scripts\python backend\manage.py test core files` |
+| Check the demo server against the design | `npm.cmd --prefix frontend test` |
 
-```
-npm.cmd --prefix frontend test
-```
-
-### The server
-
-Being built. It needs Python 3.12 or newer, LibreOffice and Tesseract.
-
-```
-python -m venv .venv
-.venv\Scripts\python -m pip install -r backend\requirements.txt
-.venv\Scripts\python backend\manage.py check_tools
-.venv\Scripts\python backend\manage.py runserver 8010
-.venv\Scripts\python backend\manage.py test core
-```
-
-`check_tools` really uses LibreOffice and Tesseract on made-up pages. If they are in an unusual place, copy `.env.example`
-to `.env` and set the paths.
-
-This is development mode, only for your own computer. Setting `DJANGO_SECRET_KEY` turns it off. To make the pages use
-the real server instead of the demo data, set `VITE_API` to `server` before starting them.
+`check_tools` really uses LibreOffice and Tesseract on made-up pages. If they are in an unusual place, copy
+`.env.example` to `.env` and set the paths. This is development mode, only for your own computer. Setting
+`DJANGO_SECRET_KEY` turns it off.
 
 ## Folders
 
 | Folder | What is in it |
 | --- | --- |
-| `backend/` | The Django server |
+| `backend/` | The Django server: `core/` (programs), `files/` (upload, convert, history) |
 | `frontend/` | The React pages. `src/api/mock/` is the demo server |
 | `docs/` | The report, the designs and the development plan |
 | `docs/design/` | Sources and builders for the diagram, the screens and the report |

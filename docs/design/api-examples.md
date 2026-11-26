@@ -529,7 +529,8 @@ Answers:
   "allowed": [
     "convert",
     "clean"
-  ]
+  ],
+  "soon": []
 }
 ```
 
@@ -649,6 +650,7 @@ Answers:
 {
   "jobId": "j-4f1c…",
   "fileId": "f-4f1c…",
+  "resultId": "f-4f1c…",
   "fileName": "contract.docx",
   "actions": [
     "clean",
@@ -709,6 +711,7 @@ Answers:
       "id": "j-4f1c…",
       "jobId": "j-4f1c…",
       "fileId": "f-4f1c…",
+      "resultId": "f-4f1c…",
       "name": "contract.docx",
       "did": "Clean, convert",
       "outcome": "kept",
@@ -719,6 +722,7 @@ Answers:
       "id": "j-4f1c…",
       "jobId": "j-4f1c…",
       "fileId": "f-4f1c…",
+      "resultId": "f-4f1c…",
       "name": "notes.pdf",
       "did": "Black out",
       "outcome": "clear",

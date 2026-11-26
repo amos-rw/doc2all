@@ -6,7 +6,7 @@ import DeleteDialog from '../components/DeleteDialog.jsx'
 import { Alert, Corner, Pill, useAction } from '../components/ui.jsx'
 import { saveBlob, timeLeft } from '../lib/helpers.js'
 
-const RESULT = { clear: ['ok', 'All clear'], kept: ['info', 'Kept'], alert: ['warn', 'Problem'] }
+const RESULT = { clear: ['ok', 'All clear'], kept: ['info', 'Kept'], alert: ['warn', 'Problem'], converted: ['info', 'Converted'], failed: ['warn', 'Failed'] }
 
 export default function History() {
   const [items, setItems] = useState(null)
@@ -20,7 +20,7 @@ export default function History() {
 
   const download = (item) =>
     run(async () => {
-      const { blob, name } = await api.download(item.fileId)
+      const { blob, name } = await api.download(item.resultId || item.fileId)
       saveBlob(blob, name)
     })
   const remove = (item) =>
@@ -70,7 +70,7 @@ export default function History() {
                   <td>
                     <div className="acts">
                       <Link to={`/report/${item.jobId}`}>Report</Link>
-                      {!item.deleted && item.outcome !== 'alert' && (
+                      {!item.deleted && !['alert', 'failed'].includes(item.outcome) && (
                         <button onClick={() => download(item)} disabled={busy}>
                           Download
                         </button>

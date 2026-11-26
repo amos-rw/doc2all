@@ -1,6 +1,7 @@
 // A helper for looking at every state while there is no real server. It is not part of Doc2All.
 import { useState } from 'react'
 import { api } from '../api/calls.js'
+import { realFiles } from '../api/client.js'
 import { useSession } from '../state/session.jsx'
 
 export default function DemoPanel() {
@@ -32,8 +33,12 @@ export default function DemoPanel() {
     <aside className="demo" aria-label="Demo helper">
       {open && (
         <div className="demo-box">
-          <b>Demo data only</b>
-          <span>Nothing is sent or converted. It stays in this browser tab.</span>
+          <b>{realFiles ? 'Partly demo data' : 'Demo data only'}</b>
+          <span>
+            {realFiles
+              ? 'Upload, convert and History use the server. The rest is made up and stays in this browser tab.'
+              : 'Nothing is sent or converted. It stays in this browser tab.'}
+          </span>
           <span>
             User <code>amos@example.com</code>
             <br />

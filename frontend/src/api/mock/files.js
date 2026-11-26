@@ -26,7 +26,7 @@ route('POST', '/api/files', 'full', async ({ body: file, user }) => {
   const record = { id: randomId('f'), ownerId: user.id, name: file.name.slice(0, 120), kind, size: file.size, createdAt: now(), expiresAt: now() + 24 * HOUR, deleted: false }
   db.files.push(record)
   audit(user.id, 'Upload', record.id)
-  return { id: record.id, name: record.name, kind, size: record.size, expiresAt: record.expiresAt, allowed: ALLOWED[kind] }
+  return { id: record.id, name: record.name, kind, size: record.size, expiresAt: record.expiresAt, allowed: ALLOWED[kind], soon: [] }
 })
 
 const liveFile = (id, user) => {
@@ -132,7 +132,7 @@ route('GET', '/api/jobs/{id}/report', 'owner', ({ params, user }) => {
   const job = mine(db.jobs, params.id, user)
   const file = db.files.find((f) => f.id === job.fileId)
   return {
-    jobId: job.id, fileId: file.id, fileName: file.name, actions: job.actions, outcome: job.outcome, findings: job.findings,
+    jobId: job.id, fileId: file.id, resultId: file.id, fileName: file.name, actions: job.actions, outcome: job.outcome, findings: job.findings,
     expiresAt: file.expiresAt, fileDeleted: file.deleted || now() > file.expiresAt,
   }
 })
@@ -157,7 +157,7 @@ route('GET', '/api/history', 'full', ({ user }) => {
   const items = [...latest.values()].reverse().map((job) => {
     const file = db.files.find((f) => f.id === job.fileId)
     return {
-      id: job.id, jobId: job.id, fileId: file.id, name: file.name, did: job.actions.map((a, i) => (i ? DID[a].toLowerCase() : DID[a])).join(', '),
+      id: job.id, jobId: job.id, fileId: file.id, resultId: file.id, name: file.name, did: job.actions.map((a, i) => (i ? DID[a].toLowerCase() : DID[a])).join(', '),
       outcome: job.outcome, expiresAt: file.expiresAt, deleted: file.deleted || now() > file.expiresAt,
     }
   })

@@ -32,6 +32,7 @@ CONVERTER_PROFILE_DIR = config("CONVERTER_PROFILE_DIR", default="")  # LibreOffi
 INSTALLED_APPS = [
     "rest_framework",
     "core",
+    "files",
 ]
 
 MIDDLEWARE = [
@@ -55,7 +56,13 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     "DEFAULT_PERMISSION_CLASSES": [],
     "UNAUTHENTICATED_USER": None,
+    "EXCEPTION_HANDLER": "core.errors.handler",
 }
+
+# Uploaded files and results: a private folder (ignored by git) that nothing serves directly (SR-10).
+PRIVATE_FILES_DIR = Path(config("PRIVATE_FILES_DIR", default=str(BASE_DIR / "private_files")))
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # SR-09
+JOBS_INLINE = False  # tests run jobs at once instead of in the background
 
 LANGUAGE_CODE = "en"
 TIME_ZONE = "UTC"
