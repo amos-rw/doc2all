@@ -11,7 +11,7 @@ checked are in the [report text](../02-doc2all-report.md), sections 3.5, 3.6 and
 4. Ids are random, at least 128 bits (SR-05).
 5. Logs and error messages never hold document content (SR-19).
 6. Secrets come from environment variables, never from the code (SR-22).
-7. Write the threats first, build the protection, then write the test.
+7. Make the piece work, then add its protections, then test it, before the next piece (see the [development plan](../development.md)).
 
 ## Accounts and sessions
 

@@ -8,7 +8,7 @@ from a scanned page, and **checks and cleans every file** on the way. It then sh
 It is a project for the module *Application Security Technologies*, to show security at **every step of the software
 development life cycle (SDLC)**.
 
-> Status: requirements and design written. No application code yet.
+> Status: requirements and design written. The application skeleton runs; the features are being built.
 
 ## What it does
 
@@ -38,12 +38,48 @@ development life cycle (SDLC)**.
 ## Tools
 
 Chosen by us (the module leaves the choice open): **Django and Django REST Framework** for the server, **React** for the
-browser, **PostgreSQL** for the database, **LibreOffice** and **Tesseract** for processing. All are free and open source.
+browser, **PostgreSQL** for the database (SQLite while the features are built), **LibreOffice** and **Tesseract** for
+processing. All are free and open source.
+
+## Running the app
+
+Needs Python 3.12 or newer, Node 22.12 or newer, LibreOffice and Tesseract. No keys or passwords are needed on a
+developer's computer. The commands are for Windows PowerShell, from the project folder.
+
+Set up once:
+
+```
+python -m venv .venv
+.venv\Scripts\python -m pip install -r backend\requirements.txt
+npm.cmd --prefix frontend install
+```
+
+Start the server in one window:
+
+```
+.venv\Scripts\python backend\manage.py runserver 8010
+```
+
+Start the browser part in a second window, then open <http://localhost:5180>:
+
+```
+npm.cmd --prefix frontend run dev
+```
+
+Run the tests:
+
+```
+.venv\Scripts\python backend\manage.py test core
+```
+
+This is the development mode: only for your own computer. Setting `DJANGO_SECRET_KEY` turns it off.
 
 ## Folders
 
 | Folder | What is in it |
 | --- | --- |
+| `backend/` | The Django server |
+| `frontend/` | The React pages |
 | `docs/` | The report, the designs and the development plan |
 | `docs/design/` | Sources and builders for the diagram, the screens and the report |
 | `samples/public/` | Made-up test documents (never real personal data) |
@@ -72,5 +108,5 @@ chrome --headless=new --no-pdf-header-footer --virtual-time-budget=10000 --print
 
 - No secrets in git. Keys and passwords live in `.env`, which is ignored. Share `.env.example` with fake values.
 - No real documents in git. Test with made-up files only.
-- Every feature gets its threats written down before it is built, and a test after.
+- Each piece is made to work, then protected and tested, before the next one. The threats are already in the report.
 - The server decides a file's type from its name and first bytes, never the browser.

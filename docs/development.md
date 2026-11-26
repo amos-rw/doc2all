@@ -1,17 +1,53 @@
 # Development plan
 
 Read the [security rules](design/security-rules.md), the [screens](design/screens.md), the [data model](design/data-model.md) and the
-[server interfaces](design/server-interfaces.md) next to this.
+[server interfaces](design/server-interfaces.md) next to this. How to run the app is in the [README](../README.md#running-the-app).
 
 ## Decisions
 
 | Topic | Decision |
 | --- | --- |
-| Tools | Free to choose for this module. Django and Django REST Framework (server), React with Vite (browser) |
+| Tools | Free to choose for this module. Django 5.2 (long-term support) and Django REST Framework (server), React with Vite (browser) |
+| Python | A virtual environment in `.venv`, with versions listed in `backend/requirements.txt` |
 | Processing | LibreOffice and Tesseract on our server |
 | Reuse | We reuse working code from our earlier project, Cohortly, then add what is missing |
-| Database | PostgreSQL, with a limited app account (see the [data model](design/data-model.md)) |
-| Email provider | A local test mail server for development. The deployment provider is not chosen yet |
+| Database | SQLite while the features are built. PostgreSQL with a limited app account (see the [data model](design/data-model.md)) before release |
+| Keys and tokens | Added later, with the pieces that need them: email sending, outside OCR, database password, deployment secret. The app runs on a developer's computer with none of them |
+| Ports | Server 8010, browser 5180 |
+
+## How each piece is built
+
+Functionality first, then protection, one piece at a time:
+
+1. **Make it work.**
+2. **Protect it.** Look at what the piece really exposes. Take its rows from the threat table (report section 4.5) and its
+   calls from the [server interfaces](design/server-interfaces.md). That sets how much security the piece needs.
+3. **Test it**, including its abuse cases.
+4. Commit. Then the next piece.
+
+Until a piece is protected, the app stays on the developer's computer, with made-up files only.
+
+## Kept from the first line
+
+These cost nothing now and are hard to add later:
+
+- No secrets and no real documents in git.
+- Uploaded files go under random names into a private folder that git ignores and the web server does not serve.
+- Ids in addresses are random, never counting numbers.
+- Our own user model is added **before** Django's sign-in apps are switched on. Changing it afterwards is painful.
+
+## Build order
+
+1. Project skeleton. In `backend/` and `frontend/`.
+2. Upload and private storage.
+3. Features, one at a time: convert, clean, scan to text, black out, safety report, history and deletion.
+4. Accounts: register, email code, sign-in, second step, passkeys, forgot password, sessions. Every file then gets an owner,
+   the owner check is added, and every call that is not marked open needs a sign-in.
+5. Notices, settings, account deletion, administrator pages, audit log.
+6. Testing: one test per abuse case, `bandit`, `pip-audit`, `npm audit`, OWASP ZAP. Record each finding, fix, retest.
+7. Deployment checklist (PostgreSQL, secrets, HTTPS, debug off) and maintenance plan.
+
+Protections that need an account, such as the owner check and the limit per user, are added in step 4 to the pieces built before it.
 
 ## Code to reuse
 
@@ -43,15 +79,3 @@ Never import from that folder. The report's Implementation section must say whic
 
 Passkeys and emailed codes · roles · cleaning · black out · safety report · history and deletion after 24 hours ·
 account deletion · notices · audit log · the finish sound.
-
-## Build order
-
-1. Project skeleton, settings from environment variables, `.env.example`.
-2. Accounts: register, email code, sign-in, second step, passkeys, forgot password, sessions.
-3. Upload gate, private storage, owner check, audit log.
-4. Features, one at a time: convert, clean, scan, black out, safety report, history and deletion.
-5. Notices, settings, account deletion, administrator pages.
-6. Testing: one test per abuse case, `bandit`, `pip-audit`, `npm audit`, OWASP ZAP. Record each finding, fix, retest.
-7. Deployment checklist and maintenance plan.
-
-For every step: write the threats first, build the protection, test it, then commit.
