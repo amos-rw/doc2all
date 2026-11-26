@@ -1,0 +1,1375 @@
+<title>Doc2All Report</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&display=swap">
+<style>
+/* Layout: white A4 sheets on a soft ground. Cover with the cat, then one flowing content sheet. Same page prints to PDF. */
+:root{
+  --bg:#EEF2F9; --chrome-ink:#14305C; --chrome-muted:#5F7093; --chrome-line:#D6E0F0;
+  --paper:#FFFFFF; --head:#14305C; --text:#3A4663; --muted:#7A879E; --rule:#E6ECF5;
+  --blue:#2F6BFF; --blue-edge:#1B4BC4; --blue-soft:#E8F0FF;
+  --ginger:#F2994A; --ginger-dark:#DB7C2B; --cream:#FFE7C9; --pink:#F5859C;
+  --catink:#14305C; --whisker:#AAB8D2; --mouth:#5B1F2E; --docline:#C9D6EA; --gold:#FFC83D;
+  --safe:#22B573; --warn:#EF5350; --scan:#19B5D6;
+  --font:"DM Sans", ui-rounded, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#0D1730; --chrome-ink:#EAF0FB; --chrome-muted:#A3B3D1; --chrome-line:#263A63; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#0D1730; --chrome-ink:#EAF0FB; --chrome-muted:#A3B3D1; --chrome-line:#263A63; color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--chrome-ink);font-family:var(--font);
+  padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar{max-width:794px;margin:0 auto 18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-size:13px;font-weight:700;color:var(--chrome-muted)}
+.bar b{color:var(--chrome-ink)}
+.paper{background:var(--paper);color:var(--text);max-width:794px;margin:0 auto 26px;border-radius:10px;
+  box-shadow:0 1px 2px rgba(20,48,92,.08),0 14px 44px rgba(20,48,92,.14);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* cover */
+.cover{aspect-ratio:210/297;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 40px;gap:0}
+.kicker{font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.cover .kicker{margin-bottom:34px}
+.cover-cat{width:min(300px,62%);height:auto;display:block;overflow:visible;margin-bottom:30px}
+.cover-cat .open-eyes{display:inline}
+.cover-cat .happy-eyes,.cover-cat .brows,.cover-cat .beam,.cover-cat .sparks,.cover-cat .alerts,.cover-cat .m-safe,.cover-cat .m-alert,.cover-cat .badge-safe,.cover-cat .badge-alert,.cover-cat .heart{display:none}
+.f-ginger{fill:var(--ginger)} .f-dark{fill:var(--ginger-dark)} .f-cream{fill:var(--cream)} .f-pink{fill:var(--pink)} .f-white{fill:#fff} .f-ink{fill:var(--catink)}
+.s-ginger{stroke:var(--ginger)} .s-dark{stroke:var(--ginger-dark)} .s-ink{stroke:var(--catink)}
+.line{fill:none;stroke-linecap:round;stroke-linejoin:round} .shadow{fill:var(--catink);opacity:.12}
+.doc-head{fill:var(--blue)}
+.cover h1{font-size:clamp(40px,8vw,60px);line-height:1.05;font-weight:800;letter-spacing:-.02em;color:var(--head);margin:0}
+.sub{font-size:clamp(15px,2.6vw,18px);color:var(--muted);margin:12px 0 0;font-weight:400}
+.bar-accent{width:72px;height:6px;border-radius:6px;background:var(--blue);margin:30px 0 26px}
+.who{font-weight:700;color:var(--head);font-size:15px;margin:0}
+.meta{font-size:13px;color:var(--muted);margin:6px 0 0;line-height:1.7}
+.meta a{color:var(--blue);text-decoration:none;font-weight:700}
+
+/* content */
+.doc{padding:60px 72px 64px;font-size:14px;line-height:1.7}
+.lead{font-size:15.5px;line-height:1.75;color:var(--text);margin:12px 0 0}
+.contents{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.contents li{display:flex;gap:14px;align-items:flex-start;font-weight:700;color:var(--head);font-size:15px;line-height:1.35;break-inside:avoid}
+.contents small{display:block;font-weight:400;color:var(--muted);font-size:12.5px;line-height:1.5;margin-top:1px}
+ol{list-style:none;counter-reset:o;padding:0;margin:14px 0;display:grid;gap:14px}
+ol>li{counter-increment:o;display:grid;grid-template-columns:28px 1fr;gap:14px;align-items:start;break-inside:avoid}
+ol>li::before{content:counter(o);width:28px;height:28px;border-radius:9px;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:13px;display:grid;place-items:center}
+.contents .c{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue);background:var(--blue-soft)}
+.block{margin-top:44px}
+.block:first-child{margin-top:0}
+h2{font-size:27px;line-height:1.2;font-weight:700;color:var(--head);margin:0 0 6px;display:flex;align-items:center;gap:14px;break-after:avoid}
+.num{width:36px;height:36px;border-radius:11px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:19px;font-weight:800;flex:none;box-shadow:0 3px 0 var(--blue-edge)}
+h3{font-size:16.5px;font-weight:700;color:var(--head);margin:30px 0 4px;display:flex;gap:10px;align-items:baseline;break-after:avoid}
+h3 .n{color:var(--blue);font-weight:800;font-size:13px;letter-spacing:.04em}
+p{margin:10px 0}
+.group{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);margin:26px 0 2px;display:flex;align-items:center;gap:10px;break-after:avoid}
+.group::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.fig{margin:26px 0 12px;text-align:center;break-inside:avoid}
+.fig svg{width:100%;max-width:560px;height:auto;display:block;margin:0 auto;overflow:visible}
+.fig-t{font-family:var(--font);font-size:16px;font-weight:700;fill:var(--head)}
+.fig-c{font-family:var(--font);font-size:28px;font-weight:800;fill:#fff;letter-spacing:.02em}
+.fig figcaption{font-size:12.5px;color:var(--muted);margin-top:8px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;margin:8px 0 6px}
+th{text-align:left;font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:8px 12px 8px 0;border-bottom:1.5px solid var(--rule)}
+td{padding:12px 12px 12px 0;border-bottom:1px solid var(--rule);vertical-align:top;font-size:13px;line-height:1.55}
+tr{break-inside:avoid}
+td.idc{white-space:nowrap;width:1%}
+.pill{display:inline-block;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:10.5px;letter-spacing:.05em;border-radius:999px;padding:3px 10px}
+.tag{display:inline-block;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:10px;letter-spacing:.04em;border-radius:999px;padding:1px 7px;margin:1px 2px 1px 0;white-space:nowrap}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:.88em;background:#F1F4FA;color:var(--head);padding:1px 6px;border-radius:6px}
+strong{color:var(--head)}
+.refs{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:14px;font-size:12.5px;color:var(--text)}
+.refs li{padding-left:16px;position:relative;line-height:1.6;overflow-wrap:anywhere}
+.refs li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.refs a{color:var(--blue);text-decoration:none}
+
+
+/* landscape page for the data-flow diagram */
+.paper.land{max-width:1123px;padding:36px 40px 30px}
+.dfdfig{margin:0}
+.paper.land h3{margin-top:0}
+.kicker{break-after:avoid}
+.dfdfig figcaption{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
+@page land{size:A4 landscape;margin:12mm 14mm 16mm;@bottom-center{content:counter(page);font-family:"DM Sans",sans-serif;font-size:9pt;color:#7A879E}}
+@media print{.paper.land{page:land;max-width:none;padding:0}.dfdfig figcaption{font-size:9pt}.dfdfig .key{font-size:8.5pt}}
+
+/* section 4.6: screen map and full-size screens */
+.smap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 16px;margin-top:16px}
+.sgrp-t{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+.srow{display:grid;gap:16px}
+.smap figure{margin:0}
+.smap img{display:block;width:100%;aspect-ratio:980/620;object-fit:cover;object-position:top;border:1px solid var(--rule);border-radius:8px}
+.smap figcaption{font-size:11.5px;color:var(--head);font-weight:700;margin-top:5px}.smap figcaption b{color:var(--blue);margin-right:4px}
+.mapcap{font-size:12.5px;color:var(--muted);text-align:center;margin:14px 0 0}
+.shot{margin:0 0 30px;text-align:center;break-inside:avoid}
+.shot-t{font-size:15px;font-weight:700;color:var(--head);text-align:left;margin-bottom:8px;display:flex;gap:10px;align-items:baseline}
+.shot-t .n{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+.shot img{display:block;width:100%;height:auto;margin:0 auto}
+.shot figcaption{font-size:12.5px;line-height:1.55;color:var(--muted);text-align:left;margin-top:8px}.shot figcaption b{color:var(--head);margin-right:4px}
+.shot figcaption div{margin-top:3px}
+.shots-end{margin-top:0}
+@media (max-width:640px){.smap{grid-template-columns:repeat(2,minmax(0,1fr))}.sgrp{grid-column:1/-1!important}.srow{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media print{.smap{grid-template-columns:repeat(4,56mm);justify-content:center;gap:4mm 6mm;margin-top:4mm}.srow{gap:6mm}.smap img{border-radius:2mm}.smap figcaption{font-size:8.5pt;margin-top:1.2mm}.mapcap{font-size:9pt;margin-top:3mm}.shotpage{break-after:page}.shotpage:last-child{break-after:auto}.shot{margin:0 0 7mm}.shot img{width:var(--pw)}.shot figcaption{font-size:9pt}}
+
+@media (max-width:640px){
+  .doc{padding:32px 22px 40px}
+  .cover{padding:36px 22px}
+  td{font-size:12.5px}
+}
+
+@page{size:A4;margin:18mm 17mm 20mm}
+@page{@bottom-center{content:counter(page);font-family:"DM Sans",sans-serif;font-size:9pt;color:#7A879E}}
+@page :first{margin:0;@bottom-center{content:none}}
+@media print{
+  body{background:#fff;padding:0}
+  .bar{display:none}
+  .paper{box-shadow:none;border-radius:0;max-width:none;margin:0}
+  .cover{aspect-ratio:auto;height:290mm;break-after:page;padding:0 20mm}
+  .doc{padding:0;font-size:10.5pt}
+  td{font-size:9.6pt}
+  .cover-cat{width:76mm}
+}
+</style>
+
+<div class="bar"><span><b>Doc2All</b> · report preview</span><span>A4 · the PDF is made from this page</span></div>
+
+<section class="paper cover">
+  <div class="kicker">Application Security Technologies · Project report</div>
+  <svg class="cover-cat" viewBox="0 0 400 420"  aria-hidden="true" >
+      <defs>
+        <clipPath id="docClip"><rect x="-30" y="-40" width="60" height="76" rx="8"/></clipPath>
+        <clipPath id="eyeClipL"><ellipse cx="158" cy="186" rx="25" ry="29"/></clipPath>
+        <clipPath id="eyeClipR"><ellipse cx="242" cy="186" rx="25" ry="29"/></clipPath>
+        <linearGradient id="beamGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#19B5D6" stop-opacity="0"/>
+          <stop offset="1" stop-color="#19B5D6" stop-opacity=".7"/>
+        </linearGradient>
+      </defs>
+
+      <ellipse class="shadow" cx="200" cy="402" rx="118" ry="13"/>
+
+      <g class="boop-g"><g class="cat-all">
+
+        <!-- tail -->
+        <g class="tail">
+          <path class="line s-ginger" stroke-width="30" d="M282 352 C352 362 376 292 342 250"/>
+          <path class="line s-dark" stroke-width="30" d="M350 272 C346 264 343 258 341 251"/>
+        </g>
+
+        <!-- body -->
+        <g class="body-g">
+          <ellipse class="f-ginger" cx="200" cy="322" rx="90" ry="76"/>
+          <ellipse class="f-dark" cx="124" cy="352" rx="36" ry="30"/>
+          <ellipse class="f-dark" cx="276" cy="352" rx="36" ry="30"/>
+          <ellipse class="f-cream" cx="200" cy="338" rx="50" ry="56"/>
+        </g>
+
+        <!-- document held in front -->
+        <g class="doc" transform="translate(200 354)">
+          <rect class="f-white" x="-30" y="-40" width="60" height="76" rx="8" stroke="var(--docline)" stroke-width="3"/>
+          <rect class="doc-head" x="-30" y="-40" width="60" height="14" clip-path="url(#docClip)"/>
+          <g fill="var(--docline)">
+            <rect x="-20" y="-18" width="40" height="5" rx="2.5"/>
+            <rect x="-20" y="-6" width="32" height="5" rx="2.5"/>
+            <rect x="-20" y="6" width="40" height="5" rx="2.5"/>
+            <rect x="-20" y="18" width="24" height="5" rx="2.5"/>
+          </g>
+          <g clip-path="url(#docClip)" class="beam"><g class="beam-g">
+            <rect x="-30" y="-22" width="60" height="22" fill="url(#beamGrad)"/>
+            <rect x="-30" y="-1.5" width="60" height="3" fill="var(--scan)"/>
+          </g></g>
+          <g class="badge-safe" transform="translate(28 -38)">
+            <circle r="15" fill="var(--safe)" stroke="#fff" stroke-width="3"/>
+            <path class="line" stroke="#fff" stroke-width="4" d="M-6 0 L-2 5 L7 -5"/>
+          </g>
+          <g class="badge-alert" transform="translate(28 -38)">
+            <circle r="15" fill="var(--warn)" stroke="#fff" stroke-width="3"/>
+            <path class="line" stroke="#fff" stroke-width="4" d="M0 -7 V2"/>
+            <circle cy="8" r="2.4" fill="#fff"/>
+          </g>
+        </g>
+
+        <!-- front paws -->
+        <g class="paws">
+          <rect class="f-ginger" x="136" y="340" width="38" height="52" rx="19"/>
+          <rect class="f-ginger" x="226" y="340" width="38" height="52" rx="19"/>
+          <ellipse class="f-cream" cx="155" cy="388" rx="21" ry="13"/>
+          <ellipse class="f-cream" cx="245" cy="388" rx="21" ry="13"/>
+          <path class="line s-dark" stroke-width="3" d="M149 384 v7 M161 384 v7 M239 384 v7 M251 384 v7"/>
+        </g>
+
+        <!-- head -->
+        <g class="head-g">
+          <g class="ear-l">
+            <path class="f-ginger" d="M100 152 Q84 80 94 62 Q102 54 114 62 L174 110 Z"/>
+            <path class="f-pink" d="M112 130 Q104 90 108 78 L152 110 Z"/>
+          </g>
+          <g class="ear-r">
+            <path class="f-ginger" d="M300 152 Q316 80 306 62 Q298 54 286 62 L226 110 Z"/>
+            <path class="f-pink" d="M288 130 Q296 90 292 78 L248 110 Z"/>
+          </g>
+          <ellipse class="f-ginger" cx="200" cy="196" rx="112" ry="92"/>
+          <ellipse class="f-ginger" cx="98" cy="228" rx="22" ry="16"/>
+          <ellipse class="f-ginger" cx="302" cy="228" rx="22" ry="16"/>
+          <path class="line s-dark" stroke-width="7" d="M200 108 v22 M178 112 l4 18 M222 112 l-4 18"/>
+          <ellipse class="f-cream" cx="200" cy="238" rx="50" ry="36"/>
+          <ellipse class="f-pink" cx="128" cy="226" rx="15" ry="9" opacity=".55"/>
+          <ellipse class="f-pink" cx="272" cy="226" rx="15" ry="9" opacity=".55"/>
+
+          <!-- eyes, open -->
+          <g class="open-eyes">
+            <g class="eye-l" clip-path="url(#eyeClipL)">
+              <ellipse class="f-white" cx="158" cy="186" rx="25" ry="29"/>
+              <g class="pupil"><g class="look">
+                <circle class="f-ink core" cx="158" cy="188" r="15"/>
+                <circle class="f-white" cx="153" cy="181" r="5"/><circle class="f-white" cx="165" cy="196" r="2.6"/>
+              </g></g>
+            </g>
+            <g class="eye-r" clip-path="url(#eyeClipR)">
+              <ellipse class="f-white" cx="242" cy="186" rx="25" ry="29"/>
+              <g class="pupil"><g class="look">
+                <circle class="f-ink core" cx="242" cy="188" r="15"/>
+                <circle class="f-white" cx="237" cy="181" r="5"/><circle class="f-white" cx="249" cy="196" r="2.6"/>
+              </g></g>
+            </g>
+          </g>
+          <!-- eyes, happy -->
+          <g class="happy-eyes">
+            <path class="line s-ink" stroke-width="8" d="M134 198 Q158 164 182 198"/>
+            <path class="line s-ink" stroke-width="8" d="M218 198 Q242 164 266 198"/>
+          </g>
+          <!-- brows -->
+          <g class="brows">
+            <path class="line s-ink" stroke-width="6" d="M130 154 Q158 144 186 154"/>
+            <path class="line s-ink" stroke-width="6" d="M214 154 Q242 144 270 154"/>
+          </g>
+
+          <path class="f-pink" d="M187 216 Q200 208 213 216 Q207 229 200 231 Q193 229 187 216 Z"/>
+          <g class="m-idle line s-ink" stroke-width="4">
+            <path d="M200 231 V238"/><path d="M200 238 Q190 250 177 242"/><path d="M200 238 Q210 250 223 242"/>
+          </g>
+          <g class="m-safe">
+            <path class="f-ink" style="fill:var(--mouth)" d="M178 240 Q200 280 222 240 Q200 248 178 240 Z"/>
+            <ellipse class="f-pink" cx="200" cy="261" rx="10" ry="6"/>
+          </g>
+          <g class="m-alert">
+            <ellipse style="fill:var(--mouth)" cx="200" cy="248" rx="8" ry="11"/>
+          </g>
+
+          <g class="whiskers line" stroke="var(--whisker)" stroke-width="3">
+            <path d="M150 238 L86 224 M150 246 L82 248 M152 254 L94 272"/>
+            <path d="M250 238 L314 224 M250 246 L318 248 M248 254 L306 272"/>
+          </g>
+        </g>
+
+        <!-- effects -->
+        <g class="sparks" fill="var(--gold)">
+          <path class="spark" transform="translate(66 110) scale(1)" d="M0 -12 Q2 -2 12 0 Q2 2 0 12 Q-2 2 -12 0 Q-2 -2 0 -12Z"/>
+          <path class="spark" transform="translate(338 92) scale(1.2)" d="M0 -12 Q2 -2 12 0 Q2 2 0 12 Q-2 2 -12 0 Q-2 -2 0 -12Z"/>
+          <path class="spark" transform="translate(352 196) scale(.8)" d="M0 -12 Q2 -2 12 0 Q2 2 0 12 Q-2 2 -12 0 Q-2 -2 0 -12Z"/>
+          <path class="spark" transform="translate(48 206) scale(.9)" d="M0 -12 Q2 -2 12 0 Q2 2 0 12 Q-2 2 -12 0 Q-2 -2 0 -12Z"/>
+        </g>
+        <g class="alerts" fill="var(--warn)">
+          <g transform="translate(60 96) rotate(-18)"><rect x="-4" y="-16" width="8" height="20" rx="4"/><circle cy="12" r="4"/></g>
+          <g transform="translate(340 96) rotate(18)"><rect x="-4" y="-16" width="8" height="20" rx="4"/><circle cy="12" r="4"/></g>
+        </g>
+        <path class="heart" transform="translate(200 56) scale(1.5)" fill="#FF6B8B" d="M0 8 C-14 -2 -12 -16 0 -9 C12 -16 14 -2 0 8Z"/>
+      </g></g>
+    </svg>
+  <h1>Doc2All</h1>
+  <p class="sub">Scan, convert and clean your documents safely</p>
+  <div class="bar-accent"></div>
+  <p class="who">Amos Ishimwe</p>
+  <p class="meta">Student number 223019604<br>24 November 2026<br>Source code: <a href="https://github.com/amos-rw/doc2all">github.com/amos-rw/doc2all</a></p>
+</section>
+
+<article class="paper doc">
+  <div class="block">
+    <div class="kicker">Abstract</div>
+    <p class="lead">Document converters and scanners ask users to trust them with private files, and they rarely check the file they receive or tell the user what happened to it. Doc2All is a web application that scans, converts and cleans documents, and gives the user a safety report as proof. It checks a file before opening it, removes hidden data and macros, can black out personal data, and records when the file is deleted. The work follows the software development life cycle, and every phase has its own security activity and its own evidence. This report sets out why security matters, the objectives, and what Doc2All must do and protect: 12 features, 11 non-functional requirements, 29 security requirements that can each be tested, and 18 abuse cases that describe how someone could misuse the application. <br><br><strong>Keywords:</strong> document security, secure file handling, secure software development life cycle, security requirements, abuse cases.</p>
+  </div>
+
+  <div class="block">
+    <div class="kicker">Contents</div>
+    <ul class="contents"><li><span class="c">1</span><div>Introduction<small>The problem, why security matters, and security in every step of the life cycle</small></div></li><li><span class="c">2</span><div>Objectives<small>The general objective and the specific objectives, in the order the system is built</small></div></li><li><span class="c">3</span><div>Requirements<small>Functional, non-functional and security requirements, abuse cases and traceability</small></div></li><li><span class="c">4</span><div>Design<small>The threat model (data-flow diagram, trust boundaries, threats and protections) and the screens</small></div></li><li><span class="c">5</span><div>Implementation<small>Secure coding rules and the features, built one after another</small></div></li><li><span class="c">6</span><div>Testing<small>One test per abuse case, code, dependency and dynamic scans, fixes and retests</small></div></li><li><span class="c">7</span><div>Deployment<small>The hardening checklist for going live</small></div></li><li><span class="c">8</span><div>Maintenance<small>The audit log, the update routine and the incident-response note</small></div></li><li><span class="c">9</span><div>Conclusion<small>What was built, what was found and fixed, and what comes next</small></div></li><li><span class="c">R</span><div>References<small>The sources used</small></div></li></ul>
+  </div>
+
+  <div class="block">
+    <h2><span class="num">1</span>Introduction</h2>
+    <h3><span class="n">1.1</span>Problem statement</h3>
+<p>Students, lecturers and office staff share documents all the time, and they often use free online tools to convert, scan or clean them. These tools ask people to trust them with their files and tell them nothing about what happens next. The file may stay on someone else's server, and the user cannot check.</p>
+<p>Documents also carry more than their visible text. Office and PDF files can contain macros and scripts, author names, edit history and photo locations. A scanned page may hold ID numbers, emails and phone numbers that are converted exactly as they are.</p>
+<p>Finally, the uploaded file is untrusted input. A file that is not what it claims to be, such as a program renamed <code>.pdf</code>, can attack the tool that opens it. Most converters never examine the file first.</p>
+<h3><span class="n">1.2</span>Why security matters</h3>
+<p>Software holds people's data, and a flaw lets someone read, change or destroy it. Security is described by three goals: confidentiality (only the right people see the data), integrity (the data is not changed without permission) and availability (the service works when it is needed) (Humayun et al., 2022). A breach also damages trust. When the personal data of customers is exposed, they may stop dealing with the organisation, and the harm can be serious (Saeed &amp; Asaad, 2022).</p>
+<p>For a document tool the stakes are direct, because the files are the product: a contract, an ID scan or a student record. If the tool leaks a file, or passes on a hidden macro, the tool has failed at its main job.</p>
+<h3><span class="n">1.3</span>Security in every step of the life cycle</h3>
+<p>Software is built in phases: requirements, design, implementation, testing, deployment and maintenance. Many teams add security at the end and fix flaws as they are found, an approach called "penetrate and patch". It leaves users to apply patches, and the cost of fixing a flaw grows with each phase it survives, so security has to be considered in all the phases (Humayun et al., 2022). Bertino et al. (2010) describe the same idea as an engineered security process: security planning, security requirements analysis, a security architecture, secure coding, security testing, and security operations and maintenance.</p>
+<figure class="fig"><svg viewBox="0 0 600 380" role="img" aria-label="The software development life cycle: requirements, design, implementation, testing, deployment and maintenance, in a circle around SDLC"><ellipse cx="300" cy="190" rx="215" ry="140" fill="none" stroke="#C9D6EA" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/><polygon points="415.0,71.6 399.4,73.2 404.3,60.1" fill="#2F6BFF"/><polygon points="515.0,198.0 508.0,184.0 522.0,184.0" fill="#2F6BFF"/><polygon points="400.0,314.1 410.7,302.6 415.6,315.7" fill="#2F6BFF"/><polygon points="185.0,308.4 200.6,306.8 195.7,319.9" fill="#2F6BFF"/><polygon points="85.0,182.0 92.0,196.0 78.0,196.0" fill="#2F6BFF"/><polygon points="200.0,65.9 189.3,77.4 184.4,64.3" fill="#2F6BFF"/><rect x="226.0" y="32.0" width="148" height="44" rx="11" fill="#C9D6EA"/><rect x="226.0" y="28.0" width="148" height="44" rx="11" fill="#fff" stroke="#C9D6EA" stroke-width="2"/><text x="300.0" y="50.0" text-anchor="middle" dominant-baseline="central" class="fig-t">Requirements</text><rect x="412.2" y="102.0" width="148" height="44" rx="11" fill="#C9D6EA"/><rect x="412.2" y="98.0" width="148" height="44" rx="11" fill="#fff" stroke="#C9D6EA" stroke-width="2"/><text x="486.2" y="120.0" text-anchor="middle" dominant-baseline="central" class="fig-t">Design</text><rect x="412.2" y="242.0" width="148" height="44" rx="11" fill="#C9D6EA"/><rect x="412.2" y="238.0" width="148" height="44" rx="11" fill="#fff" stroke="#C9D6EA" stroke-width="2"/><text x="486.2" y="260.0" text-anchor="middle" dominant-baseline="central" class="fig-t">Implementation</text><rect x="226.0" y="312.0" width="148" height="44" rx="11" fill="#C9D6EA"/><rect x="226.0" y="308.0" width="148" height="44" rx="11" fill="#fff" stroke="#C9D6EA" stroke-width="2"/><text x="300.0" y="330.0" text-anchor="middle" dominant-baseline="central" class="fig-t">Testing</text><rect x="39.8" y="242.0" width="148" height="44" rx="11" fill="#C9D6EA"/><rect x="39.8" y="238.0" width="148" height="44" rx="11" fill="#fff" stroke="#C9D6EA" stroke-width="2"/><text x="113.8" y="260.0" text-anchor="middle" dominant-baseline="central" class="fig-t">Deployment</text><rect x="39.8" y="102.0" width="148" height="44" rx="11" fill="#C9D6EA"/><rect x="39.8" y="98.0" width="148" height="44" rx="11" fill="#fff" stroke="#C9D6EA" stroke-width="2"/><text x="113.8" y="120.0" text-anchor="middle" dominant-baseline="central" class="fig-t">Maintenance</text><circle cx="300" cy="195" r="58" fill="#1B4BC4"/><circle cx="300" cy="190" r="58" fill="#2F6BFF"/><text x="300" y="190" text-anchor="middle" dominant-baseline="central" class="fig-c">SDLC</text></svg><figcaption>Security belongs in every step of the life cycle.</figcaption></figure>
+
+<p>Doc2All is built this way. Each phase has one security activity and one piece of evidence that can be shown.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Security activity</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Requirements</td>
+<td>Security requirements and abuse cases</td>
+<td>A numbered list where every item can be tested</td>
+</tr>
+<tr>
+<td>Design</td>
+<td>Threat model: data-flow diagram, trust boundaries, threats and protections</td>
+<td>The diagram and a threat table with a protection for each threat</td>
+</tr>
+<tr>
+<td>Implementation</td>
+<td>Secure coding rules: allowed-type lists, ownership checks, no secrets in code</td>
+<td>A short checklist, and the code reviewed against it</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>One automated test per abuse case, code scan, dependency scan, dynamic scan</td>
+<td>A test report with each finding, its fix and the retest</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>Hardening: debug off, secrets in environment variables, HTTPS, security headers</td>
+<td>A checklist with each item ticked</td>
+</tr>
+<tr>
+<td>Maintenance</td>
+<td>Audit log, dependency updates, incident-response note</td>
+<td>The log format, an update routine and a one-page response plan</td>
+</tr>
+</tbody>
+</table></div>
+  </div>
+
+  <div class="block">
+    <h2><span class="num">2</span>Objectives</h2>
+    <h3><span class="n">2.1</span>General objective</h3>
+<p>To give students, lecturers and office staff a safe way to convert, scan and clean their documents, by providing one web workspace that checks every file before it is opened, removes hidden data, and shows the user proof of what was done and when the file is deleted.</p>
+<h3><span class="n">2.2</span>Specific objectives</h3>
+<p>The objectives follow the order in which the system is built.</p>
+<ol>
+<li><div>To define what must be protected before anything is built, by writing functional, non-functional and security requirements that can each be tested, and abuse cases that describe how the application could be misused.</div></li>
+<li><div>To design the system with a threat model: a data-flow diagram, the trust boundaries, and a protection for every threat found.</div></li>
+<li><div>To build accounts and private storage: sign-in with a password and a required second step (passkeys or one-time codes sent by email), email confirmation, password recovery with one-time codes, account deletion, roles, and a private area for each person, so that nobody can open another person's file.</div></li>
+<li><div>To build safe upload, so that the server decides the type of every file from its name and first bytes, and rejects files that are fake, too large or too many.</div></li>
+<li><div>To build conversion of Word and PowerPoint files to PDF and of PDF files to images, in a limited, throwaway workspace.</div></li>
+<li><div>To build cleaning, which always removes content that runs by itself, lets the user choose what else to remove or keep, such as author data and photo locations, and checks the result again.</div></li>
+<li><div>To build scan to text, which reads text from images and scanned pages on our own server, so the text does not leave the system without the user's consent.</div></li>
+<li><div>To build personal-data blackout, which finds ID numbers, emails and phone numbers and removes them from the file.</div></li>
+<li><div>To build the safety report, history, deletion and audit log, so the user sees what was found and removed, and every deletion is recorded.</div></li>
+<li><div>To test the system with one automated test for every abuse case, together with code, dependency and dynamic scans, and to fix and retest each finding.</div></li>
+<li><div>To deploy the system with a hardening checklist, and to plan its maintenance with an update routine and an incident-response note.</div></li>
+</ol>
+  </div>
+
+  <div class="block">
+    <h2><span class="num">3</span>Requirements</h2>
+    <h3><span class="n">3.1</span>Stakeholders</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Who</th>
+<th>Need</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User (student, lecturer, staff)</td>
+<td>Convert and clean a document, and trust that nobody else sees it</td>
+</tr>
+<tr>
+<td>Administrator</td>
+<td>Run the service, see the audit log and system health, without reading user documents</td>
+</tr>
+<tr>
+<td>Attacker (outside)</td>
+<td>Wants other people's files, the server, or to stop the service</td>
+</tr>
+<tr>
+<td>Attacker (signed-in user)</td>
+<td>Wants another user's files or more than their allowed share of resources</td>
+</tr>
+</tbody>
+</table></div>
+<h3><span class="n">3.2</span>Functional requirements (what the app does)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">FR-01</span></td>
+<td>A person can register, sign in and sign out.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-02</span></td>
+<td>A signed-in user can upload a document.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-03</span></td>
+<td>Scan to text: read the text from an image or scanned page (OCR).</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-04</span></td>
+<td>Convert: Word or PowerPoint to PDF; PDF to images.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-05</span></td>
+<td>Clean: remove content that can run, and private details such as author data and photo locations. The user sees what was found and chooses what to keep. Content that runs by itself or reaches outside is always removed.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-06</span></td>
+<td>Black out personal data: find ID numbers, emails and phone numbers and remove them from the file.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-07</span></td>
+<td>Safety report for each file: what was found, what was removed, when the file is deleted.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-08</span></td>
+<td>A user can see the history of their own files and delete any of them.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-09</span></td>
+<td>Email check: when a person registers, a one-time code (OTP) sent to their email confirms the address.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-10</span></td>
+<td>Forgot password: a one-time code sent to the user's email lets them choose a new password.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-11</span></td>
+<td>Second step at sign-in: after the password, the user proves it is them with a passkey or a one-time code sent to their email. A user can add and remove passkeys.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">FR-12</span></td>
+<td>A user can delete their account. Their files, passkeys and sessions are removed at once.</td>
+</tr>
+</tbody>
+</table></div>
+<h3><span class="n">3.3</span>Non-functional requirements (how well it works)</h3>
+<p>Non-functional requirements say how well the app must work. The security requirements in 3.5 are non-functional too. They have their own list because they are the focus of this report.</p>
+<p class="group">Usability</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">NFR-01</span></td>
+<td>A user can go from upload to download in at most <strong>4</strong> steps: upload, choose, wait, download.</td>
+<td>Walk through the app with a stopwatch and count the steps.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">NFR-02</span></td>
+<td>The safety report uses plain words. Every finding has one sentence that says what it means and what was done.</td>
+<td>Check the report of 5 sample files against a checklist, and ask 3 people to explain it back.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">NFR-11</span></td>
+<td>When a job finishes, the app plays one short sound. The user can switch it off, and the screen always shows the same news, so nothing depends on hearing it.</td>
+<td>Finish a job with the sound on, then off: the screen message is there both times, and the second job is silent.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="group">Performance and reliability</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">NFR-03</span></td>
+<td>A typical file (up to <strong>10</strong> pages and <strong>5 MB</strong>) is checked and converted in under <strong>30 seconds</strong>.</td>
+<td>Time 10 sample files.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">NFR-04</span></td>
+<td>At least <strong>5</strong> users can use the app at the same time without errors.</td>
+<td>Run 5 scripted users at once.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">NFR-05</span></td>
+<td>If a job fails, the user sees a clear message, no partial file is kept, and the job can be started again.</td>
+<td>Stop a job halfway: message shown, no leftover file, retry works.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="group">Compatibility and access</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">NFR-06</span></td>
+<td>The app works in the current Chrome, Edge and Firefox, and on a phone screen about <strong>400 px</strong> wide.</td>
+<td>Open every page in each browser and at that width.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">NFR-07</span></td>
+<td>Every page can be used with the keyboard alone, and text has a contrast ratio of at least <strong>4.5:1</strong>.</td>
+<td>Keyboard walk-through, and a contrast checker on each page.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="group">Maintainability and cost</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">NFR-08</span></td>
+<td>All automated tests run with one command, and the result is pass or fail.</td>
+<td>Run the command on a clean copy.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">NFR-09</span></td>
+<td>The app can be set up on a clean computer by following the README in under <strong>30 minutes</strong>.</td>
+<td>Follow the README on a clean machine and time it.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">NFR-10</span></td>
+<td>The app uses only free and open-source tools (for example LibreOffice and Tesseract).</td>
+<td>List each tool with its licence.</td>
+</tr>
+</tbody>
+</table></div>
+<h3><span class="n">3.4</span>Assets to protect</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Asset</th>
+<th>Why it matters</th>
+<th>Main risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Uploaded documents and results</td>
+<td>May hold personal or school data</td>
+<td>Confidentiality</td>
+</tr>
+<tr>
+<td>Accounts, passwords, passkeys and one-time codes</td>
+<td>Open the door to the documents</td>
+<td>Confidentiality, integrity</td>
+</tr>
+<tr>
+<td>The server and the converter tools</td>
+<td>An attack here reaches every user</td>
+<td>Integrity, availability</td>
+</tr>
+<tr>
+<td>Audit log</td>
+<td>The proof that the app did what it says</td>
+<td>Integrity</td>
+</tr>
+<tr>
+<td>Safety reports</td>
+<td>Users rely on them</td>
+<td>Integrity (must be true)</td>
+</tr>
+</tbody>
+</table></div>
+<h3><span class="n">3.5</span>Security requirements</h3>
+<p>Each requirement says how it is checked. The values in <strong>bold</strong> are the limits the application enforces and the tests check.</p>
+<p class="group">Accounts and sessions</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">SR-01</span></td>
+<td>Passwords are at least <strong>12</strong> characters and stored only as a slow, salted hash.</td>
+<td>Look in the database: no readable password. Try a short password: refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-02</span></td>
+<td>After <strong>5</strong> failed sign-ins in <strong>10 minutes</strong>, further attempts for that account or address are refused for <strong>15 minutes</strong>.</td>
+<td>Script 6 wrong logins: the 6th is refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-03</span></td>
+<td>A session ends after <strong>30 minutes</strong> without activity and on sign-out.</td>
+<td>Wait or force the time: the old session is rejected.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-25</span></td>
+<td>One-time codes are random, <strong>6</strong> digits, valid for <strong>10 minutes</strong> and usable once. They are stored only as a hash. After <strong>5</strong> wrong tries a code stops working. At most <strong>3</strong> codes per hour are sent to one address.</td>
+<td>Use a code twice: refused. Try 6 wrong codes: the code is dead. Ask for a 4th code in an hour: refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-26</span></td>
+<td>Forgot password: the answer is the same whether or not the email has an account. A reset needs the emailed code and, when the account has a second step, that step too. After a reset all sessions end and the user is told by email.</td>
+<td>Ask for a reset with a known and an unknown email: same answer. Reset, then use the old session: rejected.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-27</span></td>
+<td>Every sign-in needs a second step after the password: a passkey or a one-time code. Passkeys are preferred. Changing the password, the email or the passkeys, or deleting the account, needs the second step again.</td>
+<td>Sign in with the password only: no access. Change the email or delete the account without the second step: refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-28</span></td>
+<td>Passkeys use WebAuthn. The server stores only the public key, each sign-in uses a new random challenge that works once, and a passkey works only on the Doc2All domain. A user can have several passkeys, and the last second step cannot be removed.</td>
+<td>Replay an old sign-in response: refused. Use the passkey on another domain: refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-29</span></td>
+<td>A change to the password, email or passkeys, and a sign-in on a new device, is pinned in the app until the user answers it and is also sent by email, to the address the account had before the change. A deleted account is confirmed by email. Notices about files stay in the app.</td>
+<td>Add a passkey: the notice is pinned and an email arrives. Change the email: the old address is told. Finish a job: no email is sent.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="group">Access control</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">SR-04</span></td>
+<td>Every request for a file, result, report or history entry checks that the signed-in user owns it. The answer for someone else's item is "not found".</td>
+<td>Log in as user B and request user A's item by id: refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-05</span></td>
+<td>File and job ids are random and not guessable (at least <strong>128 bits</strong>).</td>
+<td>Check the id generator; sample ids show no pattern.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-06</span></td>
+<td>Roles: user and administrator. An administrator sees records and the audit log but not document contents.</td>
+<td>Log in as administrator and try to open a document: refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-07</span></td>
+<td>Every page and API call needs a signed-in user, except sign-in, registration, forgot password and the Privacy, Cookies and About pages.</td>
+<td>Call every other address without signing in: refused.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="group">Upload and storage</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">SR-08</span></td>
+<td>The server decides the file type from the name and the first bytes. Only these types are accepted: <strong>PDF, DOCX, PPTX, PNG, JPG</strong>. A mismatch is rejected. The type sent by the browser is ignored.</td>
+<td>Upload a program renamed <code>.pdf</code>: refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-09</span></td>
+<td>Upload limits: <strong>20 MB</strong> per file, <strong>100</strong> pages, <strong>20</strong> uploads per user per hour.</td>
+<td>Upload over each limit: refused with a clear message.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-10</span></td>
+<td>The original file name is never used as a path. Files are stored under a random name in a private folder that the web server does not serve.</td>
+<td>Upload <code>../../x.pdf</code>: stored under a random name, nothing written outside the folder.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-11</span></td>
+<td>Files can only be downloaded through an authenticated request that passes <span class="tag">SR-04</span>.</td>
+<td>Open the storage address directly: no file is served.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="group">Processing</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">SR-12</span></td>
+<td>Each job runs with a time limit (<strong>60 s</strong>), a memory limit and in its own temporary folder that is deleted when the job ends.</td>
+<td>Feed a file that loops: the job stops at the limit; the folder is gone.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-13</span></td>
+<td>The converter and OCR tools run as a non-administrator account.</td>
+<td>Check the process owner.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-14</span></td>
+<td>Compressed or Office files whose expanded size is more than <strong>100 times</strong> the original, or over <strong>500 MB</strong>, are rejected before opening.</td>
+<td>Upload a zip bomb sample: rejected.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-15</span></td>
+<td>Content that runs by itself or reaches outside (macros, scripts that start on opening, hidden programs, remote templates) is always removed. Other active content (form scripts, attached documents, embedded objects) is removed unless the user chooses to keep it. Private details (author, edit history, comments, hidden text and sheets, previews) are removed or kept as the user chooses. Code written as text on a page is not changed. The cleaned file is scanned again, the report names what was removed and what was kept, and a file that keeps active content is never marked all clear.</td>
+<td>Clean a sample with a macro, a form script and a code example, asking to keep everything: the macro is gone, the form script is reported as kept, the code example is unchanged, and the result is not all clear.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-16</span></td>
+<td>Blacked-out text is removed from the file, not only covered.</td>
+<td>Extract the text from the result: the removed values are not found.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="group">Privacy and retention</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">SR-17</span></td>
+<td>OCR runs on our server. Sending document text to any outside service needs the user's clear consent for that file. The email service receives only codes and notices, never document content or file names.</td>
+<td>Watch network traffic during OCR: no outside call by default. Read a sent email: a code or notice only.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-18</span></td>
+<td>Files and results are deleted after <strong>24 hours</strong> by default, or at once when the user asks. Each deletion is logged and shown in the report. Deleting an account removes its files, passkeys and sessions at once; the audit log keeps its entries under a random user id, without the name or email.</td>
+<td>Create a file, wait or force the time: file is gone, log entry exists. Delete an account: nothing of it is left, and its log entries hold no name or email.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-19</span></td>
+<td>Logs and error messages never contain document content.</td>
+<td>Search the logs after a test run for words from a sample file: none.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="group">Accountability and platform</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>How it is checked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">SR-20</span></td>
+<td>An audit log records sign-in, upload, each processing step, download and deletion, with user, time and result. Users cannot change or delete it.</td>
+<td>Do each action; find the entry. Try to edit it as a user: refused.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-21</span></td>
+<td>The site works over HTTPS only and sends security headers (content policy, no framing, no content-type guessing).</td>
+<td>Run a header check on the deployed site.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-22</span></td>
+<td>Secrets (keys, passwords) are not in the code or the repository; they come from environment variables.</td>
+<td>Run a secret scan over the repository: none found.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-23</span></td>
+<td>Debug mode is off in deployment, and errors shown to users reveal no internal details.</td>
+<td>Trigger an error on the deployed site: a plain message only.</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">SR-24</span></td>
+<td>Before release, no known <strong>high or critical</strong> vulnerability remains in the code or its dependencies.</td>
+<td>Code scan, dependency scan and dynamic scan reports.</td>
+</tr>
+</tbody>
+</table></div>
+<h3><span class="n">3.6</span>Abuse cases</h3>
+<p>An abuse case is a story of someone misusing the app. Each one is matched to the requirements that stop it and to the test that checks it.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Who</th>
+<th>What they try</th>
+<th>Stopped by</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="idc"><span class="pill">AC-01</span></td>
+<td>Stranger</td>
+<td>Guess or reuse a file link to read a file</td>
+<td><span class="tag">SR-04</span> <span class="tag">SR-05</span> <span class="tag">SR-07</span> <span class="tag">SR-11</span></td>
+<td>Request ids without sign-in and as another user</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-02</span></td>
+<td>Signed-in user</td>
+<td>Change the id in the address to open another user's file</td>
+<td><span class="tag">SR-04</span> <span class="tag">SR-05</span></td>
+<td>User B requests user A's id</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-03</span></td>
+<td>Attacker</td>
+<td>Upload a program renamed <code>.pdf</code></td>
+<td class="idc"><span class="pill">SR-08</span></td>
+<td>Upload fake files; expect refusal</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-04</span></td>
+<td>Attacker</td>
+<td>Use a file name with <code>..</code> to write outside the folder</td>
+<td class="idc"><span class="pill">SR-10</span></td>
+<td>Upload path-trick names</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-05</span></td>
+<td>Attacker</td>
+<td>Upload a zip or Office bomb to use up the server</td>
+<td><span class="tag">SR-09</span> <span class="tag">SR-12</span> <span class="tag">SR-14</span></td>
+<td>Upload bomb sample; server stays up</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-06</span></td>
+<td>Attacker</td>
+<td>Craft a file to attack the converter and run code</td>
+<td><span class="tag">SR-12</span> <span class="tag">SR-13</span></td>
+<td>Run converter as limited user; check what it can reach</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-07</span></td>
+<td>Attacker</td>
+<td>Guess passwords by trying many</td>
+<td><span class="tag">SR-01</span> <span class="tag">SR-02</span></td>
+<td>Scripted wrong logins</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-08</span></td>
+<td>Attacker</td>
+<td>Steal or keep using an old session</td>
+<td class="idc"><span class="pill">SR-03</span></td>
+<td>Reuse an expired session</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-09</span></td>
+<td>Signed-in user</td>
+<td>Send many uploads to block others</td>
+<td><span class="tag">SR-09</span> <span class="tag">SR-12</span></td>
+<td>Exceed the hourly limit</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-10</span></td>
+<td>Curious administrator</td>
+<td>Read users' documents</td>
+<td><span class="tag">SR-06</span> <span class="tag">SR-20</span></td>
+<td>Administrator requests a document</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-11</span></td>
+<td>Careless app</td>
+<td>Keep files too long or leak content in logs</td>
+<td><span class="tag">SR-18</span> <span class="tag">SR-19</span></td>
+<td>Check deletion and log content</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-12</span></td>
+<td>User (by mistake)</td>
+<td>Share a file that still has hidden data or personal text</td>
+<td><span class="tag">SR-15</span> <span class="tag">SR-16</span></td>
+<td>Clean and black-out checks on samples</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-13</span></td>
+<td>Attacker</td>
+<td>Guess a one-time code, or flood someone's mailbox with codes</td>
+<td class="idc"><span class="pill">SR-25</span></td>
+<td>Try wrong codes; ask for many codes</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-14</span></td>
+<td>Attacker</td>
+<td>Sign in with a stolen or guessed password</td>
+<td><span class="tag">SR-27</span> <span class="tag">SR-28</span></td>
+<td>Password only: no access</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-15</span></td>
+<td>Attacker</td>
+<td>Use forgot password to take over an account, or to find which emails have accounts</td>
+<td><span class="tag">SR-26</span> <span class="tag">SR-27</span></td>
+<td>Reset with known and unknown emails; reset without the second step</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-16</span></td>
+<td>Attacker</td>
+<td>Build a fake site that collects codes or passkey sign-ins</td>
+<td><span class="tag">SR-21</span> <span class="tag">SR-28</span></td>
+<td>Use a passkey on another domain</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-17</span></td>
+<td>Attacker</td>
+<td>Send a file with a script that starts on opening, hoping the user keeps it</td>
+<td class="idc"><span class="pill">SR-15</span></td>
+<td>Ask to keep everything: it is still removed</td>
+</tr>
+<tr>
+<td class="idc"><span class="pill">AC-18</span></td>
+<td>Attacker</td>
+<td>Use an open session to delete the account or change how it signs in, without the owner noticing</td>
+<td><span class="tag">SR-27</span> <span class="tag">SR-29</span></td>
+<td>Try without the second step; check the notice and the email</td>
+</tr>
+</tbody>
+</table></div>
+<h3><span class="n">3.7</span>Traceability</h3>
+<p>Each feature points to the requirements that protect it.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Security requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Accounts <span class="tag">FR-01</span> <span class="tag">FR-09</span> <span class="tag">FR-10</span> <span class="tag">FR-11</span> <span class="tag">FR-12</span></td>
+<td><span class="tag">SR-01</span> <span class="tag">SR-02</span> <span class="tag">SR-03</span> <span class="tag">SR-07</span> <span class="tag">SR-18</span> <span class="tag">SR-25</span> <span class="tag">SR-26</span> <span class="tag">SR-27</span> <span class="tag">SR-28</span> <span class="tag">SR-29</span></td>
+</tr>
+<tr>
+<td>Upload <span class="tag">FR-02</span></td>
+<td><span class="tag">SR-08</span> <span class="tag">SR-09</span> <span class="tag">SR-10</span> <span class="tag">SR-11</span> <span class="tag">SR-14</span></td>
+</tr>
+<tr>
+<td>Scan to text <span class="tag">FR-03</span></td>
+<td><span class="tag">SR-12</span> <span class="tag">SR-13</span> <span class="tag">SR-17</span></td>
+</tr>
+<tr>
+<td>Convert <span class="tag">FR-04</span></td>
+<td><span class="tag">SR-12</span> <span class="tag">SR-13</span> <span class="tag">SR-14</span></td>
+</tr>
+<tr>
+<td>Clean <span class="tag">FR-05</span></td>
+<td class="idc"><span class="pill">SR-15</span></td>
+</tr>
+<tr>
+<td>Black out <span class="tag">FR-06</span></td>
+<td class="idc"><span class="pill">SR-16</span></td>
+</tr>
+<tr>
+<td>Report and history <span class="tag">FR-07</span> <span class="tag">FR-08</span></td>
+<td><span class="tag">SR-04</span> <span class="tag">SR-05</span> <span class="tag">SR-18</span> <span class="tag">SR-19</span> <span class="tag">SR-20</span></td>
+</tr>
+<tr>
+<td>Whole system</td>
+<td><span class="tag">SR-06</span> <span class="tag">SR-21</span> <span class="tag">SR-22</span> <span class="tag">SR-23</span> <span class="tag">SR-24</span></td>
+</tr>
+</tbody>
+</table></div>
+  </div>
+
+  <div class="block">
+    <h2><span class="num">4</span>Design</h2>
+    <p>The design turns the requirements into a threat model. A threat model asks three questions: where does the data go, where does it cross a line we do not trust, and what could go wrong at each stop. The answers are a data-flow diagram, three trust boundaries, and a table that gives every threat a protection.</p>
+  </div>
+</article>
+
+<section class="paper land"><h3><span class="n">4.1</span>Data-flow diagram</h3>
+<p>Figure 4.1 follows one file from the browser to its deletion. The numbered circles are the steps described in section 4.2. The red dashed lines are the trust boundaries described in section 4.3.</p><style>
+.dfdfig{--surface:#FFFFFF;--ink:#14305C;--muted:#586C90;--line:#D6E0F0;--primary:#2F6BFF;--on-primary:#FFFFFF;
+  --scan:#19B5D6;--safe:#22B573;--warn:#EF5350;--warn-soft:#FDE3E1;--coral-text:#C73935;--ginger:#F2994A;--ginger-dark:#DB7C2B;
+  --f-proc:#EAF1FF;--f-store:#DDF4F9;--f-ext:#FFF0DE;--e-proc:#2F6BFF;--e-store:#19B5D6;--e-ext:#F2994A;
+  --lip-proc:#1B4BC4;--lip-store:#0E8DA6;--lip-ext:#DB7C2B;--on-cyan:#FFFFFF}
+.dfdfig svg.dfd{display:block;width:100%;height:auto;max-width:94%;margin:0 auto;overflow:visible;font-family:"DM Sans",ui-rounded,"Segoe UI",system-ui,sans-serif}
+.dfdfig .zone{fill:var(--surface);stroke:var(--warn);stroke-width:2.2;stroke-dasharray:9 7}
+.dfdfig .sbx{fill:var(--warn-soft);stroke:var(--warn);stroke-width:2.2;stroke-dasharray:9 7}
+.dfdfig .lip{stroke:none}.dfdfig .lip.proc{fill:var(--lip-proc)}.dfdfig .lip.store{fill:var(--lip-store)}.dfdfig .lip.ext{fill:var(--lip-ext)}
+.dfdfig .face{stroke-width:2.5}.dfdfig .face.proc{fill:var(--f-proc);stroke:var(--e-proc)}.dfdfig .face.store{fill:var(--f-store);stroke:var(--e-store)}.dfdfig .face.ext{fill:var(--f-ext);stroke:var(--e-ext)}
+.dfdfig .face.optx{stroke-dasharray:7 6}
+.dfdfig .chip{fill:var(--surface);stroke:var(--ginger);stroke-width:2.2}
+.dfdfig .clk,.dfdfig .clk-h{fill:none;stroke:var(--ginger-dark);stroke-width:2.2;stroke-linecap:round}
+.dfdfig .flow{fill:none;stroke:var(--ink);stroke-width:2.4}.dfdfig .flow.opt{stroke:var(--safe);stroke-dasharray:7 6}
+.dfdfig .mk{fill:var(--ink)}.dfdfig .mk-o{fill:var(--safe)}
+.dfdfig .t-title{font-size:16px;font-weight:800;fill:var(--ink)}
+.dfdfig .t-lab{font-size:14px;font-weight:800;fill:var(--ink)}
+.dfdfig .t-sub{font-size:12.5px;font-weight:700;fill:var(--muted)}
+.dfdfig .t-zone{font-size:12px;font-weight:800;letter-spacing:.14em;fill:var(--muted)}
+.dfdfig .t-coral{font-size:12px;font-weight:800;letter-spacing:.14em;fill:var(--coral-text)}
+.dfdfig .badge{fill:var(--primary)}.dfdfig .badge-t{font-size:13px;font-weight:800;fill:var(--on-primary);text-anchor:middle}
+.dfdfig .tbp rect{fill:var(--warn)}.dfdfig .tbp text{font-size:11.5px;font-weight:800;fill:#fff;text-anchor:middle;letter-spacing:.06em}
+.logc{fill:#19B5D6}.logl{stroke:#fff;stroke-width:1.7;stroke-linecap:round}
+.dfdfig .key{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:center;color:#586C90;font-size:11px;margin-top:10px}
+.dfdfig .key span{display:inline-flex;align-items:center;gap:7px}
+.dfdfig .sw{width:20px;height:13px;border-radius:5px;border:1.8px solid;flex:none}
+.dfdfig .sw.p{background:var(--f-proc);border-color:var(--e-proc)}.dfdfig .sw.s{background:var(--f-store);border-color:var(--e-store)}
+.dfdfig .sw.e{background:var(--f-ext);border-color:var(--e-ext)}.dfdfig .sw.b{background:transparent;border:2px dashed var(--warn)}
+.dfdfig .dot{width:17px;height:17px;border-radius:50%;display:inline-grid;place-items:center;font-size:9.5px;font-weight:800;background:var(--primary);color:#fff;flex:none}
+.dfdfig .dot.l{background:var(--scan)}
+</style>
+<figure class="dfdfig"><svg class="dfd" id="dfd" viewBox="0 36 1340 706" role="img" aria-label="Data-flow diagram of a file journey through Doc2All, from the browser through the upload gate, private storage and the sandbox, to the report and deletion.">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto-start-reverse"><path class="mk" d="M0 1 L9.4 5 L0 9z"/></marker>
+    <marker id="ah-o" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto-start-reverse"><path class="mk-o" d="M0 1 L9.4 5 L0 9z"/></marker>
+    <g id="logb"><circle class="logc" r="10"/><line class="logl" x1="-4.5" y1="-3.4" x2="4.5" y2="-3.4"/><line class="logl" x1="-4.5" y1="0" x2="4.5" y2="0"/><line class="logl" x1="-4.5" y1="3.4" x2="1.5" y2="3.4"/></g>
+    <symbol id="ic-browser" viewBox="0 0 64 64">
+      <rect x="5" y="10" width="54" height="44" rx="9" fill="#fff"/>
+      <path d="M5 19 a9 9 0 0 1 9 -9 h36 a9 9 0 0 1 9 9 v4 h-54z" fill="#2F6BFF"/>
+      <circle cx="15" cy="17" r="2.4" fill="#fff"/><circle cx="23" cy="17" r="2.4" fill="#fff"/><circle cx="31" cy="17" r="2.4" fill="#fff"/>
+      <rect x="14" y="31" width="36" height="5" rx="2.5" fill="#C9D6EA"/><rect x="14" y="41" width="24" height="5" rx="2.5" fill="#C9D6EA"/>
+      <rect x="5" y="10" width="54" height="44" rx="9" fill="none" stroke="#14305C" stroke-width="3"/>
+    </symbol>
+    <symbol id="ic-key" viewBox="0 0 64 64">
+      <rect x="30" y="27" width="31" height="10" rx="4" fill="#FFC83D" stroke="#DB7C2B" stroke-width="3"/>
+      <path d="M47 37 v9 M55 37 v7" stroke="#DB7C2B" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="20" cy="32" r="14" fill="#FFC83D" stroke="#DB7C2B" stroke-width="3"/>
+      <circle cx="20" cy="32" r="5.5" fill="var(--f-proc)" stroke="#DB7C2B" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="ic-gear" viewBox="0 0 64 64">
+      <g fill="#2F6BFF"><rect x="27" y="4" width="10" height="56" rx="3"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(45 32 32)"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(90 32 32)"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(135 32 32)"/></g>
+      <circle cx="32" cy="32" r="19" fill="#2F6BFF" stroke="#1B4BC4" stroke-width="3"/>
+      <circle cx="32" cy="32" r="8" fill="var(--f-proc)" stroke="#1B4BC4" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="ic-mail" viewBox="0 0 64 64">
+      <rect x="6" y="14" width="52" height="38" rx="8" fill="#fff" stroke="#14305C" stroke-width="3"/>
+      <path d="M9 21 L32 39 L55 21" fill="none" stroke="#2F6BFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+
+  <rect class="zone" x="190" y="50" width="930" height="680" rx="26"/>
+  <rect class="sbx" x="840" y="245" width="250" height="210" rx="22"/>
+  <text class="t-zone" x="232" y="44">OUR SERVER</text>
+  <text class="t-zone" x="1180" y="72">NOT TRUSTED</text>
+  <text class="t-zone" x="20" y="290">NOT TRUSTED</text>
+  <text class="t-zone" x="1180" y="290">NOT TRUSTED</text>
+  <text class="t-coral" x="860" y="273">SANDBOX</text>
+  <g class="tbp"><rect x="168" y="228" width="44" height="24" rx="12"/><text x="190" y="244.5">TB1</text></g>
+  <g class="tbp"><rect x="818" y="233" width="44" height="24" rx="12"/><text x="840" y="249.5">TB2</text></g>
+  <g class="tbp"><rect x="1098" y="228" width="44" height="24" rx="12"/><text x="1120" y="244.5">TB3</text></g>
+
+  <path class="flow link" data-between="p1 d1" d="M370 142 H418" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d1 p2" d="M490 192 V300" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d1 p3" d="M710 192 V300" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="p2 d2" d="M490 424 V518" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d2 p3" d="M740 518 V428" marker-end="url(#ah)"/>
+<path class="flow link" data-between="p2 p3" d="M560 360 H638" marker-end="url(#ah)"/>
+<circle class="badge" cx="490" cy="497" r="12"/><text class="badge-t" x="490" y="501.6">4</text>
+  <g><path class="flow" d="M122 302 V142 H228" marker-end="url(#ah)"/><circle class="badge" cx="122" cy="222" r="12"/><text class="badge-t" x="122" y="226.6">1</text></g>
+<g><path class="flow" d="M150 360 H418" marker-end="url(#ah)"/><circle class="badge" cx="284" cy="360" r="12"/><text class="badge-t" x="284" y="364.6">3</text></g>
+<g><path class="flow" d="M780 340 H893" marker-end="url(#ah)"/><circle class="badge" cx="812" cy="340" r="12"/><text class="badge-t" x="812" y="344.6">5</text></g>
+<g><path class="flow" d="M930 520 V426" marker-end="url(#ah)"/><circle class="badge" cx="930" cy="490" r="12"/><text class="badge-t" x="930" y="494.6">5</text></g>
+<g><path class="flow" d="M893 384 H782" marker-end="url(#ah)"/><circle class="badge" cx="812" cy="384" r="12"/><text class="badge-t" x="812" y="388.6">7</text></g>
+<g><path class="flow" d="M1000 426 V518" marker-end="url(#ah)"/><circle class="badge" cx="1000" cy="490" r="12"/><text class="badge-t" x="1000" y="494.6">7</text></g>
+<g><path class="flow" d="M680 424 V470 H503 a13 13 0 0 0 -26 0 H85 V428" marker-end="url(#ah)"/><circle class="badge" cx="300" cy="470" r="12"/><text class="badge-t" x="300" y="474.6">8</text></g>
+<g><path class="flow opt" d="M1035 360 H1178" marker-end="url(#ah-o)"/><circle class="badge" cx="1150" cy="360" r="12"/><text class="badge-t" x="1150" y="364.6">6</text></g>
+<g><path class="flow" d="M300 84 V64 H1150 V142 H1178" marker-end="url(#ah)"/><circle class="badge" cx="700" cy="64" r="12"/><text class="badge-t" x="700" y="68.6">2</text></g>
+  <g>
+  <rect class="lip ext" x="20" y="308" width="130" height="116" rx="26"/>
+  <rect class="face ext" x="20" y="302" width="130" height="116" rx="26"/>
+  
+  <use href="#ic-browser" x="52.0" y="312" width="54" height="54"/><use href="#ic-key" x="93.0" y="308" width="36" height="36"/>
+  <text class="t-title" x="85.0" y="385" text-anchor="middle">Browser</text><text class="t-sub" x="85.0" y="405" text-anchor="middle">+ passkey</text>
+  </g>
+<g>
+  <rect class="lip ext" x="1180" y="90" width="130" height="116" rx="26"/>
+  <rect class="face ext" x="1180" y="84" width="130" height="116" rx="26"/>
+  
+  <use href="#ic-mail" x="1213.0" y="96" width="64" height="64"/>
+  <text class="t-title" x="1245.0" y="185" text-anchor="middle">Email service</text>
+  </g>
+<g>
+  <rect class="lip ext optx" x="1180" y="308" width="130" height="116" rx="26"/>
+  <rect class="face ext optx" x="1180" y="302" width="130" height="116" rx="26"/>
+  
+  <image href="icons/cloud-t.png" x="1210.0" y="320" width="70" height="70" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="1245.0" y="403" text-anchor="middle">Outside OCR</text>
+  </g>
+<g>
+  <rect class="lip proc" x="230" y="90" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="230" y="84" width="140" height="116" rx="26"/>
+  
+  <use href="#ic-key" x="268.0" y="96" width="64" height="64"/>
+  <text class="t-title" x="300.0" y="185" text-anchor="middle">Sign-in</text>
+  <use class="lb" href="#logb" x="355" y="99"/></g>
+<g>
+  <rect class="lip proc" x="420" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="420" y="302" width="140" height="116" rx="26"/>
+  
+  <image href="icons/shield-t.png" x="458.0" y="314" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="490.0" y="403" text-anchor="middle">Upload gate</text>
+  <use class="lb" href="#logb" x="545" y="317"/></g>
+<g>
+  <rect class="lip proc" x="640" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="640" y="302" width="140" height="116" rx="26"/>
+  
+  <use href="#ic-gear" x="678.0" y="314" width="64" height="64"/>
+  <text class="t-title" x="710.0" y="403" text-anchor="middle">Job manager</text>
+  <use class="lb" href="#logb" x="765" y="317"/></g>
+<g>
+  <rect class="lip proc" x="895" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="895" y="302" width="140" height="116" rx="26"/>
+  
+  <image href="icons/sealed-box-t.png" x="930.0" y="318" width="70" height="70" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="965.0" y="403" text-anchor="middle">Runner</text>
+  <use class="lb" href="#logb" x="1020" y="317"/></g>
+<g>
+  <rect class="lip store" x="420" y="98" width="320" height="100" rx="26"/>
+  <rect class="face store" x="420" y="92" width="320" height="100" rx="26"/>
+  
+  <image href="icons/database-t.png" x="436.0" y="110.0" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="512" y="147.0">Database</text>
+  <use class="lb" href="#logb" x="723" y="109"/>
+  </g>
+<g>
+  <rect class="lip store" x="420" y="526" width="670" height="84" rx="26"/>
+  <rect class="face store" x="420" y="520" width="670" height="84" rx="26"/>
+  
+  <image href="icons/locked-folder-t.png" x="436.0" y="530.0" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="512" y="567.0">Private files</text>
+  <use class="lb" href="#logb" x="1073" y="537"/>
+  <g >
+    <rect class="chip" x="868" y="541" width="196" height="42" rx="21"/>
+    <circle class="clk" cx="893" cy="562" r="10"/><path class="clk-h" d="M893 556 V562 L898 565"/>
+    <text class="t-lab" x="912" y="567">gone in 24 h</text><circle class="badge" cx="858" cy="562" r="12"/><text class="badge-t" x="858" y="566.6">9</text></g></g>
+<g>
+  <rect class="lip store" x="230" y="638" width="860" height="68" rx="26"/>
+  <rect class="face store" x="230" y="632" width="860" height="68" rx="26"/>
+  
+  <image href="icons/log-page-t.png" x="246.0" y="640.0" width="52" height="52" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="322" y="671.0">Audit log</text>
+  
+  <circle class="badge" cx="1062" cy="666" r="12"/><text class="badge-t" x="1062" y="670.6">10</text></g>
+</svg><div class="key"><span><i class="sw p"></i>Our code</span><span><i class="sw s"></i>Where data rests</span><span><i class="sw e"></i>Outside our control</span><span><i class="sw b"></i>Trust boundary</span><span><i class="dot">1</i>Step of the journey</span><span><i class="dot l">&#8801;</i>Writes to the audit log</span></div><figcaption>Figure 4.1. The journey of one file through Doc2All.</figcaption></figure></section>
+
+<article class="paper doc">
+  <div class="block">
+    <h3><span class="n">4.2</span>The journey in ten steps</h3>
+<ol>
+<li><div><strong>You sign in.</strong> Password first. Five wrong tries lock the account for 15 minutes.</div></li>
+<li><div><strong>A second step proves it is you.</strong> A passkey on your device, or a one-time code sent to your email. The same code lets you reset a forgotten password.</div></li>
+<li><div><strong>You upload a file.</strong> The upload gate checks what the file really is, not what its name says.</div></li>
+<li><div><strong>It goes into a locked folder.</strong> The file is saved under a random name that nobody can guess.</div></li>
+<li><div><strong>It opens inside a sandbox.</strong> The job manager sends a copy into a sealed box. If the file is bad, the damage stays inside.</div></li>
+<li><div><strong>Reading a scan stays on our server.</strong> An outside service receives the text only if the user agrees, for that one file.</div></li>
+<li><div><strong>Only results come out.</strong> Findings and the cleaned file come back. The sandbox never touches the database.</div></li>
+<li><div><strong>You get your file.</strong> The file and a short report of what was removed and what was kept, shown only to you.</div></li>
+<li><div><strong>Then it disappears.</strong> A timer deletes everything after 24 hours, or sooner if the user asks.</div></li>
+<li><div><strong>Every step is logged.</strong> Each step adds a line to an audit log that nobody can edit.</div></li>
+</ol>
+<h3><span class="n">4.3</span>Trust boundaries</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Boundary</th>
+<th>Between</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TB1</td>
+<td>Browser and server</td>
+<td>Nothing from the browser is trusted. The type, size, owner and role are checked again on the server.</td>
+</tr>
+<tr>
+<td>TB2</td>
+<td>Server and sandbox</td>
+<td>The file may be dangerous, so it is opened in a sealed box. The runner gets a copy and a job id, and returns only findings and a result file.</td>
+</tr>
+<tr>
+<td>TB3</td>
+<td>Server and outside services</td>
+<td>The email service receives only codes and notices, never document content or file names. Document text goes outside only if the user agrees, for that one file.</td>
+</tr>
+</tbody>
+</table></div>
+<h3><span class="n">4.4</span>Design rules</h3>
+<ol>
+<li><div><strong>One door for files.</strong> Every file comes in through the upload gate, so the checks live in one place.</div></li>
+<li><div><strong>Two steps to sign in.</strong> A password is never enough. A passkey is preferred, and a one-time code by email is the other choice.</div></li>
+<li><div><strong>The runner knows little.</strong> It gets one copy of one file and a job id. It never touches the database or another user's files.</div></li>
+<li><div><strong>One owner check.</strong> One place asks who owns what, before any report or download.</div></li>
+<li><div><strong>Outside is off.</strong> OCR and every processing step run on our server. The only outside service used by default is email, and it carries codes and notices only.</div></li>
+</ol>
+<h3><span class="n">4.5</span>Threats and protections</h3>
+<p>Each row names a part of the diagram, the threats there, the protection, and the requirements and abuse cases it comes from. The letters are the STRIDE kinds of threat: S spoofing, T tampering, R repudiation, I information disclosure, D denial of service, E elevation of privilege.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Where</th>
+<th>Threat</th>
+<th>Protection</th>
+<th>Comes from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser<br>S</td>
+<td>Anyone can pretend to be a user, or send anything at all.</td>
+<td>The server trusts nothing from the browser. Type, size, owner and role are checked again.</td>
+<td><span class="tag">SR-07</span> <span class="tag">SR-08</span></td>
+</tr>
+<tr>
+<td>Step 1 · Sign-in details<br>S, I</td>
+<td>Someone tries many passwords, or reads one on its way.</td>
+<td>12 or more characters, stored as slow salted hashes. Lock for 15 minutes after 5 failures. HTTPS only.</td>
+<td><span class="tag">SR-01</span> <span class="tag">SR-02</span> <span class="tag">SR-21</span> <span class="tag">AC-07</span></td>
+</tr>
+<tr>
+<td>Step 1 · Sign-in and sessions<br>S, R</td>
+<td>An old or stolen session keeps working, and nobody can tell who signed in.</td>
+<td>Sessions end after 30 minutes idle and on sign-out. Every sign-in is logged.</td>
+<td><span class="tag">SR-03</span> <span class="tag">SR-20</span> <span class="tag">AC-08</span></td>
+</tr>
+<tr>
+<td>Step 2 · Second step and passkeys<br>S, E</td>
+<td>A stolen or phished password is enough to sign in. A fake site collects a code.</td>
+<td>A second step is always required. A passkey works only on our own domain and never leaves the device. The server keeps only a public key.</td>
+<td><span class="tag">SR-21</span> <span class="tag">SR-27</span> <span class="tag">SR-28</span> <span class="tag">AC-14</span> <span class="tag">AC-16</span></td>
+</tr>
+<tr>
+<td>Step 2 · One-time codes by email<br>S, I, D</td>
+<td>Someone guesses a code, floods a mailbox with codes, or learns which emails have accounts.</td>
+<td>Codes are random, last 10 minutes, work once and die after 5 wrong tries. Only 3 are sent per hour. The email carries only the code.</td>
+<td><span class="tag">SR-17</span> <span class="tag">SR-25</span> <span class="tag">SR-26</span> <span class="tag">AC-13</span> <span class="tag">AC-15</span></td>
+</tr>
+<tr>
+<td>Step 2 · Forgot password<br>S, E</td>
+<td>A reset is used to take over an account, or to skip the second step.</td>
+<td>A reset needs the emailed code and, when set, the second step. The answer is the same for unknown emails. All sessions end after a reset, and the user is told by email.</td>
+<td><span class="tag">SR-26</span> <span class="tag">SR-27</span> <span class="tag">AC-15</span></td>
+</tr>
+<tr>
+<td>Step 2 · Account changes<br>S, R</td>
+<td>Someone at an open session deletes the account or changes how it signs in, and the owner does not notice.</td>
+<td>The second step is asked again. A notice is pinned in the app and emailed. Emails never hold document content or file names.</td>
+<td><span class="tag">SR-27</span> <span class="tag">SR-29</span> <span class="tag">AC-18</span></td>
+</tr>
+<tr>
+<td>Step 3 · File and choices<br>T, S</td>
+<td>A program renamed .pdf. A name like ../../x.pdf. An upload with no sign-in.</td>
+<td>The server decides the type from the name and first bytes. The name becomes a random one. Sign-in is needed.</td>
+<td><span class="tag">SR-07</span> <span class="tag">SR-08</span> <span class="tag">SR-10</span> <span class="tag">AC-03</span> <span class="tag">AC-04</span></td>
+</tr>
+<tr>
+<td>Step 3 · Upload gate<br>D</td>
+<td>A zip or Office bomb, or a flood of uploads, uses up the server.</td>
+<td>20 MB, 100 pages, 20 uploads an hour. Files that expand over 100 times are rejected before opening.</td>
+<td><span class="tag">SR-09</span> <span class="tag">SR-14</span> <span class="tag">AC-05</span> <span class="tag">AC-09</span></td>
+</tr>
+<tr>
+<td>Step 4 · Private files<br>I</td>
+<td>A guessed link or a direct address shows someone a file.</td>
+<td>Random 128-bit ids. A private folder the web server does not serve. Downloads only through the owner check.</td>
+<td><span class="tag">SR-05</span> <span class="tag">SR-10</span> <span class="tag">SR-11</span> <span class="tag">AC-01</span></td>
+</tr>
+<tr>
+<td>Step 9 · Deletion timer<br>I</td>
+<td>Files stay longer than needed.</td>
+<td>Deleted after 24 hours, or at once on request. Each deletion is logged and shown in the report.</td>
+<td><span class="tag">SR-18</span> <span class="tag">AC-11</span></td>
+</tr>
+<tr>
+<td>Database<br>I, E</td>
+<td>User A opens user B's record by changing an id. An administrator reads documents.</td>
+<td>Owner check on every request, with "not found" for others. Administrators see records, never contents.</td>
+<td><span class="tag">SR-04</span> <span class="tag">SR-06</span> <span class="tag">AC-02</span> <span class="tag">AC-10</span></td>
+</tr>
+<tr>
+<td>Job manager<br>I, R</td>
+<td>Another user's report or result is opened. A step happens with no record.</td>
+<td>Owner check before every report or download. Each step goes to the audit log.</td>
+<td><span class="tag">SR-04</span> <span class="tag">SR-20</span> <span class="tag">AC-02</span></td>
+</tr>
+<tr>
+<td>Steps 5 and 7 · Into and out of the sandbox<br>T, E</td>
+<td>A crafted file attacks the converter and tries to reach the rest of the server.</td>
+<td>The runner gets a job id and a copy in a throwaway folder. It returns only findings and a result, and never touches the database.</td>
+<td><span class="tag">SR-12</span> <span class="tag">SR-13</span> <span class="tag">AC-06</span></td>
+</tr>
+<tr>
+<td>Step 5 · Runner (sandbox)<br>D, E, T</td>
+<td>An endless document. Code running as administrator. Macros or personal text that survive.</td>
+<td>60 second and memory limits. A non-administrator account. The cleaned file is scanned again. Blacked-out text is removed from the file.</td>
+<td><span class="tag">SR-12</span> <span class="tag">SR-13</span> <span class="tag">SR-15</span> <span class="tag">SR-16</span> <span class="tag">AC-05</span> <span class="tag">AC-06</span> <span class="tag">AC-12</span></td>
+</tr>
+<tr>
+<td>Step 5 · Cleaning choices<br>T, E</td>
+<td>A harmful script stays in a file because the user chose to keep it, or the report calls such a file clean.</td>
+<td>Content that runs by itself is always removed. Other active content is removed unless the user keeps it, and then the report says so and never shows all clear.</td>
+<td><span class="tag">SR-15</span> <span class="tag">AC-17</span></td>
+</tr>
+<tr>
+<td>Step 6 · Outside OCR<br>I</td>
+<td>Personal text leaves our system.</td>
+<td>OCR runs on our server. An outside service is used only with the user's clear consent for that file.</td>
+<td class="idc"><span class="pill">SR-17</span></td>
+</tr>
+<tr>
+<td>Step 8 · Report and download<br>I</td>
+<td>A stranger or another user downloads a file.</td>
+<td>Signed-in request, owner check, random ids. HTTPS with security headers.</td>
+<td><span class="tag">SR-04</span> <span class="tag">SR-11</span> <span class="tag">SR-21</span> <span class="tag">AC-01</span> <span class="tag">AC-02</span></td>
+</tr>
+<tr>
+<td>Step 10 · Audit log<br>T, R, I</td>
+<td>A log line is edited or deleted. Document text leaks into the logs.</td>
+<td>Users cannot change the log. Logs and error messages never hold document content.</td>
+<td><span class="tag">SR-19</span> <span class="tag">SR-20</span> <span class="tag">AC-11</span></td>
+</tr>
+</tbody>
+</table></div>
+<p>All 18 abuse cases and 26 of the 29 security requirements are placed in this table. SR-22, SR-23 and SR-24 (secrets, debug mode and scans) apply to the whole build and release, so they are handled in sections 5, 6 and 7.</p>
+  </div>
+</article>
+
+<section class="paper land"><h3><span class="n">4.6</span>Screens</h3>
+<p>The screens show how a person meets these protections. Figure 4.2 maps all eleven, and the six that carry the most security decisions follow at full size, in light mode on a computer. The design also fits a phone about 400 px wide (NFR-06).</p><div class="smap"><div class="sgrp" style="grid-column:span 4"><div class="sgrp-t">Getting in</div><div class="srow" style="grid-template-columns:repeat(4,minmax(0,1fr))"><figure><img src="shots/map-1.png" alt="Screen 1, Sign-in"><figcaption><b>1</b> Sign-in</figcaption></figure><figure><img src="shots/map-2.png" alt="Screen 2, Create account"><figcaption><b>2</b> Create account</figcaption></figure><figure><img src="shots/map-3.png" alt="Screen 3, Second step"><figcaption><b>3</b> Second step</figcaption></figure><figure><img src="shots/map-4.png" alt="Screen 4, Forgot password"><figcaption><b>4</b> Forgot password</figcaption></figure></div></div><div class="sgrp" style="grid-column:span 3"><div class="sgrp-t">Doing the work</div><div class="srow" style="grid-template-columns:repeat(3,minmax(0,1fr))"><figure><img src="shots/map-5.png" alt="Screen 5, Upload and choose"><figcaption><b>5</b> Upload and choose</figcaption></figure><figure><img src="shots/map-6.png" alt="Screen 6, Consent for outside OCR"><figcaption><b>6</b> Consent for outside OCR</figcaption></figure><figure><img src="shots/map-7.png" alt="Screen 7, Safety report"><figcaption><b>7</b> Safety report</figcaption></figure></div></div><div class="sgrp" style="grid-column:span 1"><div class="sgrp-t">Admin</div><div class="srow" style="grid-template-columns:repeat(1,minmax(0,1fr))"><figure><img src="shots/map-11.png" alt="Screen 11, Audit log (admin)"><figcaption><b>11</b> Audit log (admin)</figcaption></figure></div></div><div class="sgrp" style="grid-column:span 3"><div class="sgrp-t">Looking after files</div><div class="srow" style="grid-template-columns:repeat(3,minmax(0,1fr))"><figure><img src="shots/map-8.png" alt="Screen 8, History"><figcaption><b>8</b> History</figcaption></figure><figure><img src="shots/map-9.png" alt="Screen 9, Delete confirmation"><figcaption><b>9</b> Delete confirmation</figcaption></figure><figure><img src="shots/map-10.png" alt="Screen 10, Settings"><figcaption><b>10</b> Settings</figcaption></figure></div></div></div><p class="mapcap">Figure 4.2 · The eleven screens</p></section>
+
+<article class="paper doc">
+  <div class="block"><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 1</span>Sign-in</div><img src="shots/screen-1.png" alt="Screen 1, Sign-in" style="--pw:90.9%"><figcaption><b>Figure 4.3</b> A wrong email and a wrong password give the same message. Five wrong tries lock the account for 15 minutes.<div><span class="tag">SR-01</span> <span class="tag">SR-02</span> <span class="tag">SR-21</span> <span class="tag">AC-07</span></div></figcaption></figure><figure class="shot"><div class="shot-t"><span class="n">Screen 3</span>Second step</div><img src="shots/screen-3.png" alt="Screen 3, Second step" style="--pw:90.9%"><figcaption><b>Figure 4.4</b> A password is never enough. The passkey is the first choice, and a code by email is the other.<div><span class="tag">FR-11</span> <span class="tag">SR-27</span> <span class="tag">SR-28</span> <span class="tag">AC-14</span> <span class="tag">AC-16</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 5</span>Clean options</div><img src="shots/screen-5.png" alt="Screen 5, Clean options" style="--pw:100.0%"><figcaption><b>Figure 4.5</b> The user sees what was found. What runs by itself is always removed, and the user chooses the rest.<div><span class="tag">FR-05</span> <span class="tag">SR-15</span> <span class="tag">AC-17</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 7</span>Safety report</div><img src="shots/screen-7.png" alt="Screen 7, Safety report" style="--pw:76.9%"><figcaption><b>Figure 4.6</b> Each finding says what it means and what was done, and when the file is deleted.<div><span class="tag">FR-07</span> <span class="tag">SR-15</span> <span class="tag">SR-18</span> <span class="tag">NFR-02</span></div></figcaption></figure><figure class="shot"><div class="shot-t"><span class="n">Screen 8</span>History</div><img src="shots/screen-8.png" alt="Screen 8, History" style="--pw:76.9%"><figcaption><b>Figure 4.7</b> Only the owner's files are listed. A security notice stays pinned until the user answers it.<div><span class="tag">FR-08</span> <span class="tag">SR-04</span> <span class="tag">SR-18</span> <span class="tag">SR-29</span></div></figcaption></figure></div><div class="shotpage"><figure class="shot"><div class="shot-t"><span class="n">Screen 11</span>Audit log (administrator)</div><img src="shots/screen-11.png" alt="Screen 11, Audit log (administrator)" style="--pw:100.0%"><figcaption><b>Figure 4.8</b> An administrator sees who did what and when, never the content of a document.<div><span class="tag">SR-06</span> <span class="tag">SR-19</span> <span class="tag">SR-20</span> <span class="tag">AC-10</span></div></figcaption></figure></div></div>
+
+  <div class="block">
+    <div class="kicker">References</div>
+    <ul class="refs"><li>Humayun, M., Jhanjhi, N. Z., Almufareh, M. F., & Khalil, M. I. (2022). Security threat and vulnerability assessment and measurement in secure software development. <em>Computers, Materials & Continua</em>, 71(3). <a href="https://doi.org/10.32604/cmc.2022.019289">https://doi.org/10.32604/cmc.2022.019289</a></li><li>Saeed, V. A., & Asaad, R. R. (2022). Cyber security threats, vulnerability, challenges with proposed solution. <em>Applied Computing Journal</em>, 2(4), 227-244. <a href="https://doi.org/10.52098/acj.202260">https://doi.org/10.52098/acj.202260</a></li><li>Bertino, E., Martino, L., Paci, F., & Squicciarini, A. (2010). <em>Security for Web Services and Service-Oriented Architectures</em>. Springer. <a href="https://doi.org/10.1007/978-3-540-87742-4">https://doi.org/10.1007/978-3-540-87742-4</a></li></ul>
+  </div>
+</article>

@@ -1,0 +1,744 @@
+<title>Doc2All Threat Model</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a coach card first (cat, one step at a time, chunky Next), the icon diagram that lights up as you go, three short boundary notes, and the full threat table folded away. */
+:root{
+  --bg:#F3F7FD; --surface:#FFFFFF; --ink:#14305C; --muted:#586C90; --line:#D6E0F0; --edge:#BFCCE4;
+  --primary:#2F6BFF; --primary-edge:#1B4BC4; --on-primary:#FFFFFF; --primary-text:#2257D8;
+  --hello-soft:#E3ECFC; --scan:#19B5D6; --scan-soft:#D8F2F9; --safe:#22B573; --safe-soft:#DAF5E8; --warn:#EF5350; --warn-soft:#FDE3E1; --coral-text:#C73935;
+  --ginger:#F2994A; --ginger-dark:#DB7C2B; --cream:#FFE7C9; --pink:#F5859C;
+  --catink:#14305C; --whisker:#AAB8D2; --mouth:#5B1F2E; --docline:#C9D6EA; --gold:#FFC83D;
+  --f-proc:#EAF1FF; --f-store:#DDF4F9; --f-ext:#FFF0DE; --e-proc:#2F6BFF; --e-store:#19B5D6; --e-ext:#F2994A;
+  --lip-proc:#1B4BC4; --lip-store:#0E8DA6; --lip-ext:#DB7C2B;
+  --on-cyan:#FFFFFF; --stage:var(--hello-soft);
+  --font:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1730; --surface:#16264A; --ink:#EAF0FB; --muted:#A3B3D1; --line:#263A63; --edge:#0A1226;
+  --primary:#5B8CFF; --primary-edge:#3566E0; --on-primary:#0D1730; --primary-text:#9DBCFF;
+  --hello-soft:#1B2F5B; --scan-soft:#0F3646; --safe-soft:#123B33; --warn-soft:#44232B; --coral-text:#FF8E8B;
+  --f-proc:#1B2F5B; --f-store:#0F3646; --f-ext:#46301D; --e-proc:#5B8CFF; --e-store:#3CC8E4; --e-ext:#F5A862;
+  --on-cyan:#06303A; --stage:var(--hello-soft); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1730; --surface:#16264A; --ink:#EAF0FB; --muted:#A3B3D1; --line:#263A63; --edge:#0A1226;
+  --primary:#5B8CFF; --primary-edge:#3566E0; --on-primary:#0D1730; --primary-text:#9DBCFF;
+  --hello-soft:#1B2F5B; --scan-soft:#0F3646; --safe-soft:#123B33; --warn-soft:#44232B; --coral-text:#FF8E8B;
+  --f-proc:#1B2F5B; --f-store:#0F3646; --f-ext:#46301D; --e-proc:#5B8CFF; --e-store:#3CC8E4; --e-ext:#F5A862;
+  --on-cyan:#06303A; --stage:var(--hello-soft); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-weight:600;font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;padding-block:30px 64px;display:flex;flex-direction:column;gap:34px}
+h1,h2,h3{font-weight:900;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,4.6vw,42px)}
+h2{font-size:clamp(22px,3vw,28px)}
+h3{font-size:17px}
+p{margin:0}
+.brand{font-weight:900;font-size:20px;letter-spacing:-.01em}.brand b{color:var(--primary)}
+.eyebrow{font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-size:.9em}
+header{display:flex;flex-direction:column;gap:8px}
+header p{color:var(--muted);max-width:56ch}
+
+/* coach */
+.coach{background:var(--stage);border:2px solid var(--line);border-bottom-width:6px;border-radius:30px;
+  display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:10px 30px;align-items:center;padding:22px 30px;transition:background .45s}
+.coach[data-mood="checking"]{--stage:var(--scan-soft)}
+.coach[data-mood="safe"]{--stage:var(--safe-soft)}
+.coach[data-mood="alert"]{--stage:var(--warn-soft)}
+.cat-wrap{cursor:pointer;align-self:end}
+#cat{display:block;width:100%;height:auto;overflow:visible}
+.say{display:flex;flex-direction:column;gap:10px;min-width:0}
+.progress{display:flex;gap:6px;min-height:10px}
+.progress[hidden]{display:none}
+.progress i{flex:1;height:10px;border-radius:6px;background:var(--line);transition:background .3s}
+.progress i.on{background:var(--primary)}
+.say p{max-width:60ch;font-size:17px}
+.btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px}
+.btn{font:inherit;font-weight:900;font-size:15px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;border:0;border-radius:16px;padding:12px 26px;
+  background:var(--primary);color:var(--on-primary);box-shadow:0 5px 0 var(--primary-edge);transition:transform .08s,box-shadow .08s}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--primary-edge)}
+.btn.ghost{background:var(--surface);color:var(--primary-text);border:2px solid var(--edge);box-shadow:0 5px 0 var(--edge);padding:10px 24px}
+.btn:focus-visible,.node:focus-visible,summary:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+.btn[hidden]{display:none}
+.facts{display:grid;gap:10px}
+.fact{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:10px 14px;display:grid;gap:4px;font-size:15px}
+.fact .k{display:inline-block;min-width:3.4em;font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.fact .k.r{color:var(--coral-text)} .fact .k.f{color:var(--safe)}
+.refs{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.ref{font-family:var(--mono);font-size:11.5px;font-weight:500;padding:1px 8px;border-radius:99px;border:1px solid var(--edge);background:var(--surface)}
+.ref.ac{border-color:var(--warn);color:var(--coral-text)}
+
+/* diagram */
+figure{margin:0;display:flex;flex-direction:column;gap:14px;min-width:0}
+.scroll{overflow-x:auto;background:var(--surface);border:2px solid var(--line);border-radius:26px;padding:12px}
+svg.dfd{display:block;width:100%;min-width:1100px;height:auto;font-family:var(--font)}
+.zone{fill:var(--surface);stroke:var(--warn);stroke-width:2.2;stroke-dasharray:9 7}
+.sbx{fill:var(--warn-soft);stroke:var(--warn);stroke-width:2.2;stroke-dasharray:9 7}
+.lip{stroke:none} .lip.proc{fill:var(--lip-proc)} .lip.store{fill:var(--lip-store)} .lip.ext{fill:var(--lip-ext)}
+.face{stroke-width:2.5} .face.proc{fill:var(--f-proc);stroke:var(--e-proc)} .face.store{fill:var(--f-store);stroke:var(--e-store)} .face.ext{fill:var(--f-ext);stroke:var(--e-ext)}
+.face.optx{stroke-dasharray:7 6}
+.ring{fill:none;stroke:var(--primary);stroke-width:3.5;opacity:0}
+.chip{fill:var(--surface);stroke:var(--ginger);stroke-width:2.2}
+.clk{fill:none;stroke:var(--ginger-dark);stroke-width:2.2} .clk-h{fill:none;stroke:var(--ginger-dark);stroke-width:2.2;stroke-linecap:round}
+.flow{fill:none;stroke:var(--ink);stroke-width:2.4}
+.flow.opt{stroke:var(--safe);stroke-dasharray:7 6}
+.mk{fill:var(--ink)} .mk-o{fill:var(--safe)}
+.hit{fill:none;stroke:transparent;stroke-width:22;pointer-events:stroke}
+.t-title{font-size:16px;font-weight:800;fill:var(--ink)}
+.t-lab{font-size:14px;font-weight:800;fill:var(--ink)}
+.t-sub{font-size:12.5px;font-weight:700;fill:var(--muted)}
+.t-zone{font-size:12px;font-weight:800;letter-spacing:.14em;fill:var(--muted)}
+.t-coral{font-size:12px;font-weight:800;letter-spacing:.14em;fill:var(--coral-text)}
+.badge{fill:var(--primary)} .badge-t{font-size:13px;font-weight:900;fill:var(--on-primary);text-anchor:middle}
+.tbp rect{fill:var(--warn)} .tbp text{font-size:11.5px;font-weight:900;fill:#fff;text-anchor:middle;letter-spacing:.06em}
+.logc{fill:var(--scan)} .logl{stroke:var(--on-cyan);stroke-width:1.7;stroke-linecap:round}
+.node{cursor:pointer;transition:opacity .3s}
+.node:focus{outline:none}
+.node:hover .face{stroke-width:3.6}
+.node:hover .flow{stroke-width:3.6}
+.node.cur .ring{opacity:1;animation:ringp 1.3s ease-in-out infinite}
+.node.cur .flow{stroke:var(--primary);stroke-width:4.2}
+.node.cur .flow.opt{stroke:var(--safe)}
+.node.cur .face{stroke-width:3.6}
+.link{transition:opacity .3s}
+.dim{opacity:.18}
+.hl-log .lb{animation:lbp 1s ease-in-out infinite}
+@keyframes ringp{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes lbp{0%,100%{opacity:1}50%{opacity:.3}}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;color:var(--muted);font-size:14px}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.sw{width:24px;height:16px;border-radius:6px;border:2px solid;flex:none}
+.sw.p{background:var(--f-proc);border-color:var(--e-proc)} .sw.s{background:var(--f-store);border-color:var(--e-store)} .sw.e{background:var(--f-ext);border-color:var(--e-ext)}
+.sw.b{background:transparent;border:2px dashed var(--warn)}
+.dot{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:900;flex:none;background:var(--primary);color:var(--on-primary)}
+.dot.l{background:var(--scan);color:var(--on-cyan)}
+
+/* boundaries and rules */
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px 28px}
+.three>div{display:flex;flex-direction:column;gap:8px;border-top:3px solid var(--warn);padding-top:14px;min-width:0}
+.pill{display:inline-block;width:fit-content;background:var(--warn);color:#fff;font-size:12px;font-weight:900;letter-spacing:.06em;padding:2px 12px;border-radius:99px}
+.three p,.rule span{color:var(--muted)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px 28px;margin:0;padding:0;list-style:none}
+.rule{display:flex;flex-direction:column;gap:2px}
+.rule b{font-weight:900}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* table, folded */
+details{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:6px 22px}
+summary{cursor:pointer;font-weight:900;font-size:17px;padding:14px 0;list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:26px;line-height:1;color:var(--primary-text)}
+details[open] summary::after{content:"\2212"}
+.tbody{display:flex;flex-direction:column;gap:14px;padding-bottom:18px}
+.stride{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:14px}.stride b{color:var(--ink)}
+.rowh,.row{display:grid;grid-template-columns:1.05fr 1.5fr 1.6fr .9fr;gap:8px 26px;padding:14px 2px;align-items:start}
+.rowh{padding-block:6px;border-bottom:2px solid var(--ink)}
+.row{border-bottom:1px solid var(--line);font-size:15px}
+.row>div{min-width:0}
+.where{font-weight:800;display:flex;flex-direction:column;gap:4px}
+.st{display:flex;gap:4px;flex-wrap:wrap}
+.st i{font-style:normal;font-family:var(--mono);font-size:11.5px;font-weight:500;width:22px;height:22px;display:inline-grid;place-items:center;border-radius:6px;background:var(--f-proc);color:var(--primary-text);border:1px solid var(--e-proc)}
+.cell-l{display:none;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.cover{background:var(--bg);border-radius:14px;padding:12px 16px;color:var(--muted);font-size:15px}.cover b{color:var(--ink)}
+
+@media (max-width:820px){
+  .coach{grid-template-columns:minmax(0,1fr);padding:18px;gap:8px}
+  .cat-wrap{width:110px;margin:0 auto}
+  .rowh{display:none}
+  .row{grid-template-columns:1fr;gap:10px}
+  .cell-l{display:block}
+}
+/* cat colours */
+.f-ginger{fill:var(--ginger)} .f-dark{fill:var(--ginger-dark)} .f-cream{fill:var(--cream)} .f-pink{fill:var(--pink)} .f-white{fill:#fff}
+.f-ink{fill:var(--catink)} .s-ginger{stroke:var(--ginger)} .s-dark{stroke:var(--ginger-dark)} .s-ink{stroke:var(--catink)}
+.line{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.shadow{fill:var(--catink);opacity:.14}
+
+/* cat animation */
+#cat .boop-g,#cat .cat-all,#cat .tail,#cat .body-g,#cat .head-g,#cat .ear-l,#cat .ear-r,#cat .eye-l,#cat .eye-r,#cat .whiskers{transform-box:view-box}
+.boop-g{transform-origin:200px 396px}
+.cat-all{transform-origin:200px 396px;animation:bob 4.2s ease-in-out infinite}
+.body-g{transform-origin:200px 396px;animation:breathe 3.6s ease-in-out infinite}
+.tail{transform-origin:282px 350px;animation:wag 3.4s ease-in-out infinite}
+.head-g{transform-origin:200px 290px}
+.ear-l{transform-origin:132px 128px;animation:twitchl 7s ease-in-out infinite}
+.ear-r{transform-origin:268px 128px;animation:twitchr 9s ease-in-out infinite}
+.eye-l{transform-origin:158px 186px;animation:blink 5s infinite}
+.eye-r{transform-origin:242px 186px;animation:blink 5s infinite}
+.whiskers{transform-origin:200px 240px;animation:whisk 5.5s ease-in-out infinite}
+.pupil{transform:translate(calc(var(--px,0)*1px),calc(var(--py,0)*1px));transition:transform .14s ease-out}
+.core{transform-box:fill-box;transform-origin:center;transition:transform .25s}
+.heart{opacity:0;transform-box:fill-box;transform-origin:center}
+.boop .boop-g{animation:squish .5s ease-out}
+.boop .heart{animation:heart .95s ease-out}
+
+.open-eyes,.happy-eyes,.brows,.beam,.sparks,.alerts,.m-safe,.m-alert,.badge-safe,.badge-alert{display:none}
+.m-idle{display:inline}
+svg[data-mood="checking"] .brows,svg[data-mood="alert"] .brows{display:inline}
+svg[data-mood="checking"] .beam{display:inline}
+svg[data-mood="safe"] .sparks,svg[data-mood="alert"] .alerts{display:inline}
+svg[data-mood="safe"] .m-safe,svg[data-mood="alert"] .m-alert{display:inline}
+svg[data-mood="safe"] .m-idle,svg[data-mood="alert"] .m-idle{display:none}
+.open-eyes{display:inline}
+svg[data-mood="safe"] .open-eyes{display:none}
+svg[data-mood="safe"] .happy-eyes{display:inline}
+svg[data-mood="safe"] .badge-safe,svg[data-mood="alert"] .badge-alert{display:inline;animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+.badge-safe,.badge-alert{transform-box:fill-box;transform-origin:center}
+
+.doc-head{fill:var(--primary)}
+svg[data-mood="checking"] .doc-head{fill:var(--scan)}
+svg[data-mood="safe"] .doc-head{fill:var(--safe)}
+svg[data-mood="alert"] .doc-head{fill:var(--warn)}
+
+svg[data-mood="checking"] .head-g{animation:tilt 2.6s ease-in-out infinite}
+svg[data-mood="checking"] .look{animation:scan 1.3s ease-in-out infinite alternate}
+svg[data-mood="checking"] .tail{animation-duration:2.2s}
+svg[data-mood="safe"] .cat-all{animation:hop .75s ease-out infinite}
+svg[data-mood="safe"] .tail{animation-duration:.7s}
+svg[data-mood="alert"] .cat-all{animation:shake 2.4s ease-in-out infinite}
+svg[data-mood="alert"] .ear-l{animation:none;transform:rotate(-14deg)}
+svg[data-mood="alert"] .ear-r{animation:none;transform:rotate(14deg)}
+svg[data-mood="alert"] .brows{transform:translateY(-12px)}
+svg[data-mood="alert"] .core{transform:scale(.62)}
+svg[data-mood="alert"] .tail{animation:none;transform:rotate(8deg)}
+.beam-g{animation:sweep 1.3s ease-in-out infinite alternate}
+.spark{transform-box:fill-box;transform-origin:center;animation:twinkle 1.5s ease-in-out infinite}
+.spark:nth-child(2){animation-delay:.4s}.spark:nth-child(3){animation-delay:.8s}.spark:nth-child(4){animation-delay:1.1s}
+.alerts g{animation:flick .5s steps(2,end) infinite}
+
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.012,1.022)}}
+@keyframes wag{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(11deg)}}
+@keyframes twitchl{0%,88%,100%{transform:rotate(0)}91%{transform:rotate(-7deg)}94%{transform:rotate(2deg)}}
+@keyframes twitchr{0%,80%,100%{transform:rotate(0)}84%{transform:rotate(7deg)}88%{transform:rotate(-2deg)}}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.08)}}
+@keyframes whisk{0%,100%{transform:rotate(0)}50%{transform:rotate(1.4deg)}}
+@keyframes tilt{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes scan{from{transform:translateX(-8px)}to{transform:translateX(8px)}}
+@keyframes sweep{from{transform:translateY(-34px)}to{transform:translateY(40px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}35%{transform:translateY(-16px)}}
+@keyframes shake{0%,34%,100%{transform:translateX(0)}4%{transform:translateX(-6px)}8%{transform:translateX(6px)}12%{transform:translateX(-5px)}16%{transform:translateX(5px)}20%{transform:translateX(-3px)}24%{transform:translateX(3px)}}
+@keyframes twinkle{0%,100%{transform:scale(0);opacity:0}50%{transform:scale(1);opacity:1}}
+@keyframes flick{0%{opacity:1}100%{opacity:.25}}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes squish{0%{transform:scale(1,1)}30%{transform:scale(1.07,.9)}60%{transform:scale(.97,1.05)}100%{transform:scale(1,1)}}
+@keyframes heart{0%{opacity:0;transform:translateY(0) scale(.4)}20%{opacity:1}100%{opacity:0;transform:translateY(-46px) scale(1.2)}}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
+
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="brand">Doc<b>2</b>All</div>
+  <span class="eyebrow">Design · Threat model</span>
+  <h1>How Doc2All keeps a file safe</h1>
+  <p>Follow one file from upload to deletion. Press any part of the picture to see what could go wrong there.</p>
+</header>
+
+<section aria-label="Guided tour">
+  <div class="coach" id="coach" data-mood="hello">
+    <div class="cat-wrap" id="catwrap" title="Boop"><svg id="cat" viewBox="0 0 400 420" role="img" aria-hidden="true" data-mood="hello">
+      <defs>
+        <clipPath id="docClip"><rect x="-30" y="-40" width="60" height="76" rx="8"/></clipPath>
+        <clipPath id="eyeClipL"><ellipse cx="158" cy="186" rx="25" ry="29"/></clipPath>
+        <clipPath id="eyeClipR"><ellipse cx="242" cy="186" rx="25" ry="29"/></clipPath>
+        <linearGradient id="beamGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#19B5D6" stop-opacity="0"/>
+          <stop offset="1" stop-color="#19B5D6" stop-opacity=".7"/>
+        </linearGradient>
+      </defs>
+
+      <ellipse class="shadow" cx="200" cy="402" rx="118" ry="13"/>
+
+      <g class="boop-g"><g class="cat-all">
+
+        <!-- tail -->
+        <g class="tail">
+          <path class="line s-ginger" stroke-width="30" d="M282 352 C352 362 376 292 342 250"/>
+          <path class="line s-dark" stroke-width="30" d="M350 272 C346 264 343 258 341 251"/>
+        </g>
+
+        <!-- body -->
+        <g class="body-g">
+          <ellipse class="f-ginger" cx="200" cy="322" rx="90" ry="76"/>
+          <ellipse class="f-dark" cx="124" cy="352" rx="36" ry="30"/>
+          <ellipse class="f-dark" cx="276" cy="352" rx="36" ry="30"/>
+          <ellipse class="f-cream" cx="200" cy="338" rx="50" ry="56"/>
+        </g>
+
+        <!-- document held in front -->
+        <g class="doc" transform="translate(200 354)">
+          <rect class="f-white" x="-30" y="-40" width="60" height="76" rx="8" stroke="var(--docline)" stroke-width="3"/>
+          <rect class="doc-head" x="-30" y="-40" width="60" height="14" clip-path="url(#docClip)"/>
+          <g fill="var(--docline)">
+            <rect x="-20" y="-18" width="40" height="5" rx="2.5"/>
+            <rect x="-20" y="-6" width="32" height="5" rx="2.5"/>
+            <rect x="-20" y="6" width="40" height="5" rx="2.5"/>
+            <rect x="-20" y="18" width="24" height="5" rx="2.5"/>
+          </g>
+          <g clip-path="url(#docClip)" class="beam"><g class="beam-g">
+            <rect x="-30" y="-22" width="60" height="22" fill="url(#beamGrad)"/>
+            <rect x="-30" y="-1.5" width="60" height="3" fill="var(--scan)"/>
+          </g></g>
+          <g class="badge-safe" transform="translate(28 -38)">
+            <circle r="15" fill="var(--safe)" stroke="#fff" stroke-width="3"/>
+            <path class="line" stroke="#fff" stroke-width="4" d="M-6 0 L-2 5 L7 -5"/>
+          </g>
+          <g class="badge-alert" transform="translate(28 -38)">
+            <circle r="15" fill="var(--warn)" stroke="#fff" stroke-width="3"/>
+            <path class="line" stroke="#fff" stroke-width="4" d="M0 -7 V2"/>
+            <circle cy="8" r="2.4" fill="#fff"/>
+          </g>
+        </g>
+
+        <!-- front paws -->
+        <g class="paws">
+          <rect class="f-ginger" x="136" y="340" width="38" height="52" rx="19"/>
+          <rect class="f-ginger" x="226" y="340" width="38" height="52" rx="19"/>
+          <ellipse class="f-cream" cx="155" cy="388" rx="21" ry="13"/>
+          <ellipse class="f-cream" cx="245" cy="388" rx="21" ry="13"/>
+          <path class="line s-dark" stroke-width="3" d="M149 384 v7 M161 384 v7 M239 384 v7 M251 384 v7"/>
+        </g>
+
+        <!-- head -->
+        <g class="head-g">
+          <g class="ear-l">
+            <path class="f-ginger" d="M100 152 Q84 80 94 62 Q102 54 114 62 L174 110 Z"/>
+            <path class="f-pink" d="M112 130 Q104 90 108 78 L152 110 Z"/>
+          </g>
+          <g class="ear-r">
+            <path class="f-ginger" d="M300 152 Q316 80 306 62 Q298 54 286 62 L226 110 Z"/>
+            <path class="f-pink" d="M288 130 Q296 90 292 78 L248 110 Z"/>
+          </g>
+          <ellipse class="f-ginger" cx="200" cy="196" rx="112" ry="92"/>
+          <ellipse class="f-ginger" cx="98" cy="228" rx="22" ry="16"/>
+          <ellipse class="f-ginger" cx="302" cy="228" rx="22" ry="16"/>
+          <path class="line s-dark" stroke-width="7" d="M200 108 v22 M178 112 l4 18 M222 112 l-4 18"/>
+          <ellipse class="f-cream" cx="200" cy="238" rx="50" ry="36"/>
+          <ellipse class="f-pink" cx="128" cy="226" rx="15" ry="9" opacity=".55"/>
+          <ellipse class="f-pink" cx="272" cy="226" rx="15" ry="9" opacity=".55"/>
+
+          <!-- eyes, open -->
+          <g class="open-eyes">
+            <g class="eye-l" clip-path="url(#eyeClipL)">
+              <ellipse class="f-white" cx="158" cy="186" rx="25" ry="29"/>
+              <g class="pupil"><g class="look">
+                <circle class="f-ink core" cx="158" cy="188" r="15"/>
+                <circle class="f-white" cx="153" cy="181" r="5"/><circle class="f-white" cx="165" cy="196" r="2.6"/>
+              </g></g>
+            </g>
+            <g class="eye-r" clip-path="url(#eyeClipR)">
+              <ellipse class="f-white" cx="242" cy="186" rx="25" ry="29"/>
+              <g class="pupil"><g class="look">
+                <circle class="f-ink core" cx="242" cy="188" r="15"/>
+                <circle class="f-white" cx="237" cy="181" r="5"/><circle class="f-white" cx="249" cy="196" r="2.6"/>
+              </g></g>
+            </g>
+          </g>
+          <!-- eyes, happy -->
+          <g class="happy-eyes">
+            <path class="line s-ink" stroke-width="8" d="M134 198 Q158 164 182 198"/>
+            <path class="line s-ink" stroke-width="8" d="M218 198 Q242 164 266 198"/>
+          </g>
+          <!-- brows -->
+          <g class="brows">
+            <path class="line s-ink" stroke-width="6" d="M130 154 Q158 144 186 154"/>
+            <path class="line s-ink" stroke-width="6" d="M214 154 Q242 144 270 154"/>
+          </g>
+
+          <path class="f-pink" d="M187 216 Q200 208 213 216 Q207 229 200 231 Q193 229 187 216 Z"/>
+          <g class="m-idle line s-ink" stroke-width="4">
+            <path d="M200 231 V238"/><path d="M200 238 Q190 250 177 242"/><path d="M200 238 Q210 250 223 242"/>
+          </g>
+          <g class="m-safe">
+            <path class="f-ink" style="fill:var(--mouth)" d="M178 240 Q200 280 222 240 Q200 248 178 240 Z"/>
+            <ellipse class="f-pink" cx="200" cy="261" rx="10" ry="6"/>
+          </g>
+          <g class="m-alert">
+            <ellipse style="fill:var(--mouth)" cx="200" cy="248" rx="8" ry="11"/>
+          </g>
+
+          <g class="whiskers line" stroke="var(--whisker)" stroke-width="3">
+            <path d="M150 238 L86 224 M150 246 L82 248 M152 254 L94 272"/>
+            <path d="M250 238 L314 224 M250 246 L318 248 M248 254 L306 272"/>
+          </g>
+        </g>
+
+        <!-- effects -->
+        <g class="sparks" fill="var(--gold)">
+          <path class="spark" transform="translate(66 110) scale(1)" d="M0 -12 Q2 -2 12 0 Q2 2 0 12 Q-2 2 -12 0 Q-2 -2 0 -12Z"/>
+          <path class="spark" transform="translate(338 92) scale(1.2)" d="M0 -12 Q2 -2 12 0 Q2 2 0 12 Q-2 2 -12 0 Q-2 -2 0 -12Z"/>
+          <path class="spark" transform="translate(352 196) scale(.8)" d="M0 -12 Q2 -2 12 0 Q2 2 0 12 Q-2 2 -12 0 Q-2 -2 0 -12Z"/>
+          <path class="spark" transform="translate(48 206) scale(.9)" d="M0 -12 Q2 -2 12 0 Q2 2 0 12 Q-2 2 -12 0 Q-2 -2 0 -12Z"/>
+        </g>
+        <g class="alerts" fill="var(--warn)">
+          <g transform="translate(60 96) rotate(-18)"><rect x="-4" y="-16" width="8" height="20" rx="4"/><circle cy="12" r="4"/></g>
+          <g transform="translate(340 96) rotate(18)"><rect x="-4" y="-16" width="8" height="20" rx="4"/><circle cy="12" r="4"/></g>
+        </g>
+        <path class="heart" transform="translate(200 56) scale(1.5)" fill="#FF6B8B" d="M0 8 C-14 -2 -12 -16 0 -9 C12 -16 14 -2 0 8Z"/>
+      </g></g>
+    </svg></div>
+    <div class="say">
+      <div class="progress" id="progress" aria-hidden="true"></div>
+      <span class="eyebrow" id="kicker">Ready</span>
+      <h2 id="ctitle">Take the 30-second tour</h2>
+      <p id="ctext" aria-live="polite">See where a file goes, and what protects it at every stop.</p>
+      <div class="facts" id="facts" hidden></div>
+      <div class="btns">
+        <button class="btn ghost" id="back" type="button" hidden>Back</button>
+        <button class="btn" id="next" type="button">Start</button>
+        <button class="btn ghost" id="skip" type="button" hidden>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <figure>
+    <div class="scroll"><svg class="dfd" id="dfd" viewBox="0 0 1340 760" role="group" aria-label="Data-flow diagram. Use the tour above, or press any part.">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto-start-reverse"><path class="mk" d="M0 1 L9.4 5 L0 9z"/></marker>
+    <marker id="ah-o" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto-start-reverse"><path class="mk-o" d="M0 1 L9.4 5 L0 9z"/></marker>
+    <g id="logb"><circle class="logc" r="10"/><line class="logl" x1="-4.5" y1="-3.4" x2="4.5" y2="-3.4"/><line class="logl" x1="-4.5" y1="0" x2="4.5" y2="0"/><line class="logl" x1="-4.5" y1="3.4" x2="1.5" y2="3.4"/></g>
+    <symbol id="ic-browser" viewBox="0 0 64 64">
+      <rect x="5" y="10" width="54" height="44" rx="9" fill="#fff"/>
+      <path d="M5 19 a9 9 0 0 1 9 -9 h36 a9 9 0 0 1 9 9 v4 h-54z" fill="#2F6BFF"/>
+      <circle cx="15" cy="17" r="2.4" fill="#fff"/><circle cx="23" cy="17" r="2.4" fill="#fff"/><circle cx="31" cy="17" r="2.4" fill="#fff"/>
+      <rect x="14" y="31" width="36" height="5" rx="2.5" fill="#C9D6EA"/><rect x="14" y="41" width="24" height="5" rx="2.5" fill="#C9D6EA"/>
+      <rect x="5" y="10" width="54" height="44" rx="9" fill="none" stroke="#14305C" stroke-width="3"/>
+    </symbol>
+    <symbol id="ic-key" viewBox="0 0 64 64">
+      <rect x="30" y="27" width="31" height="10" rx="4" fill="#FFC83D" stroke="#DB7C2B" stroke-width="3"/>
+      <path d="M47 37 v9 M55 37 v7" stroke="#DB7C2B" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="20" cy="32" r="14" fill="#FFC83D" stroke="#DB7C2B" stroke-width="3"/>
+      <circle cx="20" cy="32" r="5.5" fill="var(--f-proc)" stroke="#DB7C2B" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="ic-gear" viewBox="0 0 64 64">
+      <g fill="#2F6BFF"><rect x="27" y="4" width="10" height="56" rx="3"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(45 32 32)"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(90 32 32)"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(135 32 32)"/></g>
+      <circle cx="32" cy="32" r="19" fill="#2F6BFF" stroke="#1B4BC4" stroke-width="3"/>
+      <circle cx="32" cy="32" r="8" fill="var(--f-proc)" stroke="#1B4BC4" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="ic-mail" viewBox="0 0 64 64">
+      <rect x="6" y="14" width="52" height="38" rx="8" fill="#fff" stroke="#14305C" stroke-width="3"/>
+      <path d="M9 21 L32 39 L55 21" fill="none" stroke="#2F6BFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+
+  <rect class="zone" x="190" y="50" width="930" height="680" rx="26"/>
+  <rect class="sbx" x="840" y="245" width="250" height="210" rx="22"/>
+  <text class="t-zone" x="232" y="44">OUR SERVER</text>
+  <text class="t-zone" x="1180" y="72">NOT TRUSTED</text>
+  <text class="t-zone" x="20" y="290">NOT TRUSTED</text>
+  <text class="t-zone" x="1180" y="290">NOT TRUSTED</text>
+  <text class="t-coral" x="860" y="273">SANDBOX</text>
+  <g class="tbp"><rect x="168" y="228" width="44" height="24" rx="12"/><text x="190" y="244.5">TB1</text></g>
+  <g class="tbp"><rect x="818" y="233" width="44" height="24" rx="12"/><text x="840" y="249.5">TB2</text></g>
+  <g class="tbp"><rect x="1098" y="228" width="44" height="24" rx="12"/><text x="1120" y="244.5">TB3</text></g>
+
+  <path class="flow link" data-between="p1 d1" d="M370 142 H418" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d1 p2" d="M490 192 V300" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d1 p3" d="M710 192 V300" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="p2 d2" d="M490 424 V518" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d2 p3" d="M740 518 V428" marker-end="url(#ah)"/>
+<path class="flow link" data-between="p2 p3" d="M560 360 H638" marker-end="url(#ah)"/>
+  <g class="node flownode" data-id="f1" tabindex="0" role="button" aria-label="Flow 1, sign-in details">
+  <path class="hit" d="M122 302 V142 H228"/>
+  <path class="flow" d="M122 302 V142 H228" marker-end="url(#ah)"/>
+  <circle class="badge" cx="122" cy="222" r="12"/><text class="badge-t" x="122" y="226.6">1</text></g>
+<g class="node flownode" data-id="f2" tabindex="0" role="button" aria-label="Flow 2, the file and choices">
+  <path class="hit" d="M150 360 H418"/>
+  <path class="flow" d="M150 360 H418" marker-end="url(#ah)"/>
+  <circle class="badge" cx="284" cy="360" r="12"/><text class="badge-t" x="284" y="364.6">2</text></g>
+<g class="node flownode" data-id="f3" tabindex="0" role="button" aria-label="Flow 3, job id to the runner">
+  <path class="hit" d="M780 340 H893"/>
+  <path class="flow" d="M780 340 H893" marker-end="url(#ah)"/>
+  <circle class="badge" cx="812" cy="340" r="12"/><text class="badge-t" x="812" y="344.6">3</text></g>
+<g class="node flownode" data-id="f4" tabindex="0" role="button" aria-label="Flow 4, file copy into the sandbox">
+  <path class="hit" d="M930 520 V426"/>
+  <path class="flow" d="M930 520 V426" marker-end="url(#ah)"/>
+  <circle class="badge" cx="930" cy="490" r="12"/><text class="badge-t" x="930" y="494.6">4</text></g>
+<g class="node flownode" data-id="f5" tabindex="0" role="button" aria-label="Flow 5, findings back">
+  <path class="hit" d="M893 384 H782"/>
+  <path class="flow" d="M893 384 H782" marker-end="url(#ah)"/>
+  <circle class="badge" cx="812" cy="384" r="12"/><text class="badge-t" x="812" y="388.6">5</text></g>
+<g class="node flownode" data-id="f6" tabindex="0" role="button" aria-label="Flow 6, result out of the sandbox">
+  <path class="hit" d="M1000 426 V518"/>
+  <path class="flow" d="M1000 426 V518" marker-end="url(#ah)"/>
+  <circle class="badge" cx="1000" cy="490" r="12"/><text class="badge-t" x="1000" y="494.6">6</text></g>
+<g class="node flownode" data-id="f7" tabindex="0" role="button" aria-label="Flow 7, report and download">
+  <path class="hit" d="M680 424 V470 H503 a13 13 0 0 0 -26 0 H85 V428"/>
+  <path class="flow" d="M680 424 V470 H503 a13 13 0 0 0 -26 0 H85 V428" marker-end="url(#ah)"/>
+  <circle class="badge" cx="300" cy="470" r="12"/><text class="badge-t" x="300" y="474.6">7</text></g>
+<g class="node flownode" data-id="f8" tabindex="0" role="button" aria-label="Flow 8, text to an outside service, only with consent">
+  <path class="hit" d="M1035 360 H1178"/>
+  <path class="flow opt" d="M1035 360 H1178" marker-end="url(#ah-o)"/>
+  <circle class="badge" cx="1150" cy="360" r="12"/><text class="badge-t" x="1150" y="364.6">8</text></g>
+<g class="node flownode" data-id="f9" tabindex="0" role="button" aria-label="Flow 9, one-time code sent by email">
+  <path class="hit" d="M300 84 V64 H1150 V142 H1178"/>
+  <path class="flow" d="M300 84 V64 H1150 V142 H1178" marker-end="url(#ah)"/>
+  <circle class="badge" cx="700" cy="64" r="12"/><text class="badge-t" x="700" y="68.6">9</text></g>
+  <g class="node" data-id="e1" tabindex="0" role="button" aria-label="The person's browser, with a passkey">
+  <rect class="lip ext" x="20" y="308" width="130" height="116" rx="26"/>
+  <rect class="face ext" x="20" y="302" width="130" height="116" rx="26"/>
+  <rect class="ring" x="13" y="295" width="144" height="136" rx="32"/>
+  <use href="#ic-browser" x="52.0" y="312" width="54" height="54"/><use href="#ic-key" x="93.0" y="308" width="36" height="36"/>
+  <text class="t-title" x="85.0" y="385" text-anchor="middle">Browser</text><text class="t-sub" x="85.0" y="405" text-anchor="middle">+ passkey</text>
+  </g>
+<g class="node" data-id="x2" tabindex="0" role="button" aria-label="Email service for one-time codes">
+  <rect class="lip ext" x="1180" y="90" width="130" height="116" rx="26"/>
+  <rect class="face ext" x="1180" y="84" width="130" height="116" rx="26"/>
+  <rect class="ring" x="1173" y="77" width="144" height="136" rx="32"/>
+  <use href="#ic-mail" x="1213.0" y="96" width="64" height="64"/>
+  <text class="t-title" x="1245.0" y="185" text-anchor="middle">Email service</text>
+  </g>
+<g class="node" data-id="x1" tabindex="0" role="button" aria-label="Outside OCR service, optional">
+  <rect class="lip ext optx" x="1180" y="308" width="130" height="116" rx="26"/>
+  <rect class="face ext optx" x="1180" y="302" width="130" height="116" rx="26"/>
+  <rect class="ring" x="1173" y="295" width="144" height="136" rx="32"/>
+  <image href="icons/cloud-t.png" x="1210.0" y="320" width="70" height="70" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="1245.0" y="403" text-anchor="middle">Outside OCR</text>
+  </g>
+<g class="node" data-id="p1" tabindex="0" role="button" aria-label="Sign-in and sessions">
+  <rect class="lip proc" x="230" y="90" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="230" y="84" width="140" height="116" rx="26"/>
+  <rect class="ring" x="223" y="77" width="154" height="136" rx="32"/>
+  <use href="#ic-key" x="268.0" y="96" width="64" height="64"/>
+  <text class="t-title" x="300.0" y="185" text-anchor="middle">Sign-in</text>
+  <use class="lb" href="#logb" x="355" y="99"/></g>
+<g class="node" data-id="p2" tabindex="0" role="button" aria-label="Upload gate">
+  <rect class="lip proc" x="420" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="420" y="302" width="140" height="116" rx="26"/>
+  <rect class="ring" x="413" y="295" width="154" height="136" rx="32"/>
+  <image href="icons/shield-t.png" x="458.0" y="314" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="490.0" y="403" text-anchor="middle">Upload gate</text>
+  <use class="lb" href="#logb" x="545" y="317"/></g>
+<g class="node" data-id="p3" tabindex="0" role="button" aria-label="Job manager and report">
+  <rect class="lip proc" x="640" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="640" y="302" width="140" height="116" rx="26"/>
+  <rect class="ring" x="633" y="295" width="154" height="136" rx="32"/>
+  <use href="#ic-gear" x="678.0" y="314" width="64" height="64"/>
+  <text class="t-title" x="710.0" y="403" text-anchor="middle">Job manager</text>
+  <use class="lb" href="#logb" x="765" y="317"/></g>
+<g class="node" data-id="p4" tabindex="0" role="button" aria-label="Job runner in the sandbox">
+  <rect class="lip proc" x="895" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="895" y="302" width="140" height="116" rx="26"/>
+  <rect class="ring" x="888" y="295" width="154" height="136" rx="32"/>
+  <image href="icons/sealed-box-t.png" x="930.0" y="318" width="70" height="70" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="965.0" y="403" text-anchor="middle">Runner</text>
+  <use class="lb" href="#logb" x="1020" y="317"/></g>
+<g class="node" data-id="d1" tabindex="0" role="button" aria-label="Database">
+  <rect class="lip store" x="420" y="98" width="320" height="100" rx="26"/>
+  <rect class="face store" x="420" y="92" width="320" height="100" rx="26"/>
+  <rect class="ring" x="413" y="85" width="334" height="120" rx="32"/>
+  <image href="icons/database-t.png" x="436.0" y="110.0" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="512" y="147.0">Database</text>
+  <use class="lb" href="#logb" x="723" y="109"/>
+  </g>
+<g class="node" data-id="d2" tabindex="0" role="button" aria-label="Private file store">
+  <rect class="lip store" x="420" y="526" width="670" height="84" rx="26"/>
+  <rect class="face store" x="420" y="520" width="670" height="84" rx="26"/>
+  <rect class="ring" x="413" y="513" width="684" height="104" rx="32"/>
+  <image href="icons/locked-folder-t.png" x="436.0" y="530.0" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="512" y="567.0">Private files</text>
+  <use class="lb" href="#logb" x="1073" y="537"/>
+  <g class="node" data-id="t" tabindex="0" role="button" aria-label="Deletion timer, files are deleted after 24 hours">
+    <rect class="chip" x="868" y="541" width="196" height="42" rx="21"/>
+    <circle class="clk" cx="893" cy="562" r="10"/><path class="clk-h" d="M893 556 V562 L898 565"/>
+    <text class="t-lab" x="912" y="567">gone in 24 h</text></g></g>
+<g class="node" data-id="d3" tabindex="0" role="button" aria-label="Audit log">
+  <rect class="lip store" x="230" y="638" width="860" height="68" rx="26"/>
+  <rect class="face store" x="230" y="632" width="860" height="68" rx="26"/>
+  <rect class="ring" x="223" y="625" width="874" height="88" rx="32"/>
+  <image href="icons/log-page-t.png" x="246.0" y="640.0" width="52" height="52" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="322" y="671.0">Audit log</text>
+  
+  </g>
+</svg></div>
+    <div class="legend" aria-label="Legend">
+      <span><i class="sw p"></i>Our code</span>
+      <span><i class="sw s"></i>Where data rests</span>
+      <span><i class="sw e"></i>Outside our control</span>
+      <span><i class="sw b"></i>Trust boundary</span>
+      <span><i class="dot">1</i>Crosses a boundary</span>
+      <span><i class="dot l">≡</i>Writes to the audit log</span>
+    </div>
+  </figure>
+</section>
+
+<section aria-labelledby="h-tb">
+  <h2 id="h-tb">Three lines we never cross without a check</h2>
+  <div class="three">
+    <div><span class="pill">TB1</span><h3>Browser to server</h3><p>Trust nothing. Check everything again.</p></div>
+    <div><span class="pill">TB2</span><h3>Server to sandbox</h3><p>The file may be dangerous, so it opens in a sealed box.</p></div>
+    <div><span class="pill">TB3</span><h3>Server to outside</h3><p>Email gets only codes and notices. Anything else needs a yes.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-ru">
+  <h2 id="h-ru">Five rules this design depends on</h2>
+  <p class="muted">These are my proposals. Tell me if one is wrong.</p>
+  <ul class="rules">
+    <li class="rule"><b>One door for files.</b><span>Every file comes in through the upload gate.</span></li>
+    <li class="rule"><b>The runner knows little.</b><span>One copy, one job id, no database.</span></li>
+    <li class="rule"><b>One owner check.</b><span>One place asks who owns what.</span></li>
+    <li class="rule"><b>Two steps to sign in.</b><span>A password is never enough. A passkey is preferred.</span></li>
+    <li class="rule"><b>Outside is off.</b><span>Only email is used, and only for codes and notices. Anything else needs a yes.</span></li>
+  </ul>
+</section>
+
+<section>
+  <details>
+    <summary>All threats and protections <span class="muted" id="count"></span></summary>
+    <div class="tbody">
+      <div class="stride" aria-label="STRIDE letters">
+        <span><b>S</b> Spoofing</span><span><b>T</b> Tampering</span><span><b>R</b> Repudiation</span>
+        <span><b>I</b> Information disclosure</span><span><b>D</b> Denial of service</span><span><b>E</b> Elevation of privilege</span>
+      </div>
+      <div id="rows"><div class="rowh eyebrow"><div>Where</div><div>Threat</div><div>Protection</div><div>Comes from</div></div></div>
+      <p class="cover" id="cover"></p>
+    </div>
+  </details>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var NAMES={e1:"The browser and passkey",p1:"Sign-in",d1:"Database",p2:"Upload gate",p3:"Job manager",p4:"Runner (sandbox)",d2:"Private files",t:"Deletion timer",d3:"Audit log",x1:"Outside OCR",x2:"Email service",
+    f1:"Flow 1: sign-in details",f2:"Flow 2: file and choices",f3:"Flow 3: job id",f4:"Flow 4: copy in",f5:"Flow 5: findings",f6:"Flow 6: result",f7:"Flow 7: report and download",f8:"Flow 8: outside OCR",f9:"Flow 9: one-time code by email"};
+  var STEPS=[
+    {t:'You sign in',x:'Password first. Five wrong tries lock the account for 15 minutes.',ids:['e1','f1','p1','d1'],m:'hello'},
+    {t:'A second step proves it is you',x:'A passkey on your device, or a code sent to your email. The same code resets a forgotten password.',ids:['f9','x2'],m:'checking'},
+    {t:'You upload a file',x:'The gate checks what the file really is, not what its name says.',ids:['f2','p2'],m:'checking'},
+    {t:'It goes in a locked folder',x:'It is saved under a random name that nobody can guess.',ids:['d2'],m:'checking'},
+    {t:'It opens inside a sandbox',x:'The job manager sends a copy into a sealed box. If the file is bad, the damage stays inside.',ids:['p3','f3','f4','p4'],m:'alert'},
+    {t:'Reading a scan?',x:'The text stays on our server. An outside service gets it only if you say yes.',ids:['f8','x1'],m:'hello'},
+    {t:'Only results come out',x:'Findings and a cleaned file come back. The box never touches the database.',ids:['f5','f6'],m:'checking'},
+    {t:'You get your file',x:'Your file and a short report of what was removed and kept, shown only to you.',ids:['f7','e1'],m:'safe'},
+    {t:'Then it disappears',x:'A timer deletes everything after 24 hours. You can delete sooner.',ids:['t'],m:'safe'},
+    {t:'Every step is logged',x:'Each step leaves a line in a log that nobody can edit.',ids:['d3','log'],m:'hello'}
+  ];
+  var ROWS=[
+    {ids:['e1'],where:"Browser",s:'S',threat:'Anyone can pretend to be a user, or send anything at all.',fix:'The server trusts nothing from the browser. Type, size, owner and role are checked again.',sr:[7,8],ac:[]},
+    {ids:['f1'],where:'Flow 1 · Sign-in details',s:'SI',threat:'Someone tries many passwords, or reads one on its way.',fix:'12+ characters, stored as slow salted hashes. Lock for 15 min after 5 failures. HTTPS only.',sr:[1,2,21],ac:[7]},
+    {ids:['p1'],where:'Sign-in',s:'SR',threat:'An old or stolen session keeps working, and nobody can tell who signed in.',fix:'Sessions end after 30 min idle and on sign-out. Every sign-in is logged.',sr:[3,20],ac:[8]},
+    {ids:['p1','e1'],where:'Second step and passkeys',s:'SE',threat:'A stolen or phished password is enough to sign in. A fake site collects a code.',fix:'A second step is always required. A passkey works only on our own domain and never leaves the device. The server keeps only a public key.',sr:[21,27,28],ac:[14,16]},
+    {ids:['f9','x2'],where:'Flow 9 · One-time codes by email',s:'SID',threat:'Someone guesses a code, floods a mailbox with codes, or learns which emails have accounts.',fix:'Codes are random, last 10 minutes, work once and die after 5 wrong tries. Only 3 are sent per hour. The email carries only the code.',sr:[17,25,26],ac:[13,15]},
+    {ids:['p1','x2'],where:'Forgot password',s:'SE',threat:'A reset is used to take over an account, or to skip the second step.',fix:'A reset needs the emailed code and, when set, the second step. The answer is the same for unknown emails. All sessions end after a reset, and the user is told by email.',sr:[26,27],ac:[15]},
+    {ids:['p1','x2'],where:'Account changes',s:'SR',threat:'Someone at an open session deletes the account or changes how it signs in, and the owner does not notice.',fix:'The second step is asked again. A notice is pinned in the app and emailed. Emails never hold document content or file names.',sr:[27,29],ac:[18]},
+    {ids:['f2'],where:'Flow 2 · File and choices',s:'TS',threat:'A program renamed .pdf. A name like ../../x.pdf. An upload with no sign-in.',fix:'The server decides the type from the name and first bytes. The name becomes a random one. Sign-in is needed.',sr:[7,8,10],ac:[3,4]},
+    {ids:['p2'],where:'Upload gate',s:'D',threat:'A zip or Office bomb, or a flood of uploads, uses up the server.',fix:'20 MB, 100 pages, 20 uploads an hour. Files that expand over 100 times are rejected before opening.',sr:[9,14],ac:[5,9]},
+    {ids:['d2'],where:'Private files',s:'I',threat:'A guessed link or a direct address shows someone a file.',fix:'Random 128-bit ids. A private folder the web server does not serve. Downloads only through the owner check.',sr:[5,10,11],ac:[1]},
+    {ids:['t','d2'],where:'Deletion timer',s:'I',threat:'Files stay longer than needed.',fix:'Deleted after 24 h, or at once on request. Each deletion is logged and shown in the report.',sr:[18],ac:[11]},
+    {ids:['d1'],where:'Database',s:'IE',threat:"User A opens user B's record by changing an id. An administrator reads documents.",fix:'Owner check on every request, with "not found" for others. Administrators see records, never contents.',sr:[4,6],ac:[2,10]},
+    {ids:['p3'],where:'Job manager',s:'IR',threat:"Another user's report or result is opened. A step happens with no record.",fix:'Owner check before every report or download. Each step goes to the audit log.',sr:[4,20],ac:[2]},
+    {ids:['f3','f4','f5','f6'],where:'Flows 3 to 6 · Into and out of the sandbox',s:'TE',threat:'A crafted file attacks the converter and tries to reach the rest of the server.',fix:'The runner gets a job id and a copy in a throwaway folder. It returns only findings and a result, and never touches the database.',sr:[12,13],ac:[6]},
+    {ids:['p4'],where:'Runner (sandbox)',s:'DET',threat:'An endless document. Code running as administrator. Macros or personal text that survive.',fix:'60 s and memory limits. A non-administrator account. The cleaned file is scanned again. Blacked-out text is removed from the file.',sr:[12,13,15,16],ac:[5,6,12]},
+    {ids:['p4'],where:'Cleaning choices',s:'TE',threat:'A harmful script stays in a file because the user chose to keep it, or the report calls such a file clean.',fix:'Content that runs by itself is always removed. Other active content is removed unless the user keeps it, and then the report says so and never shows all clear.',sr:[15],ac:[17]},
+    {ids:['f8','x1'],where:'Flow 8 · Outside OCR',s:'I',threat:'Personal text leaves our system.',fix:"OCR runs on our server. An outside service is used only with the user's clear consent for that file.",sr:[17],ac:[]},
+    {ids:['f7'],where:'Flow 7 · Report and download',s:'I',threat:'A stranger or another user downloads a file.',fix:'Signed-in request, owner check, random ids. HTTPS with security headers.',sr:[4,11,21],ac:[1,2]},
+    {ids:['d3'],where:'Audit log',s:'TRI',threat:'A log line is edited or deleted. Document text leaks into the logs.',fix:'Users cannot change the log. Logs and error messages never hold document content.',sr:[19,20],ac:[11]}
+  ];
+  var $=function(i){return document.getElementById(i)};
+  var pad=function(n){return (n<10?'0':'')+n};
+  var coach=$('coach'),cat=$('cat'),kicker=$('kicker'),ctitle=$('ctitle'),ctext=$('ctext'),facts=$('facts'),progress=$('progress'),
+      backB=$('back'),nextB=$('next'),skipB=$('skip'),svg=$('dfd');
+  var nodes=[].slice.call(svg.querySelectorAll('.node')), links=[].slice.call(svg.querySelectorAll('.link')), lbs=[].slice.call(svg.querySelectorAll('.lb'));
+  var mode='free', step=0, sel=null;
+
+  STEPS.forEach(function(){progress.appendChild(document.createElement('i'))});
+
+  function refsHtml(r){
+    var h=r.sr.map(function(n){return '<span class="ref">SR-'+pad(n)+'</span>'}).concat(r.ac.map(function(n){return '<span class="ref ac">AC-'+pad(n)+'</span>'})).join('');
+    return h?'<div class="refs">'+h+'</div>':'';
+  }
+  function setMood(m){coach.setAttribute('data-mood',m);cat.setAttribute('data-mood',m)}
+  function light(set,cur){
+    var all=!set;
+    nodes.forEach(function(n){var id=n.dataset.id;n.classList.toggle('dim',!all&&!set[id]);n.classList.toggle('cur',!!cur&&cur.indexOf(id)>-1)});
+    links.forEach(function(l){var b=l.dataset.between.split(' ');var on=all||(mode==='explore'?b.indexOf(sel)>-1:(set[b[0]]&&set[b[1]]));l.classList.toggle('dim',!on)});
+    lbs.forEach(function(l){l.style.opacity=(all||(set&&set.log))?1:.15});
+    svg.classList.toggle('hl-log',!!(cur&&cur.indexOf('log')>-1));
+  }
+  function render(){
+    facts.hidden=true;facts.innerHTML='';
+    progress.hidden=(mode==='free'||mode==='explore');
+    if(mode==='free'){
+      light(null,null);setMood('hello');
+      kicker.textContent='Ready';ctitle.textContent='Take the 30-second tour';
+      ctext.textContent='See where a file goes, and what protects it at every stop. Or press any part of the picture.';
+      progress.querySelectorAll('i').forEach(function(i){i.classList.remove('on')});
+      nextB.textContent='Start';nextB.hidden=false;backB.hidden=true;skipB.hidden=true;
+    }else if(mode==='tour'){
+      var set={},cur=STEPS[step].ids;
+      for(var i=0;i<=step;i++)STEPS[i].ids.forEach(function(k){set[k]=1});
+      light(set,cur);setMood(STEPS[step].m);
+      kicker.textContent='Step '+(step+1)+' of '+STEPS.length;ctitle.textContent=STEPS[step].t;ctext.textContent=STEPS[step].x;
+      progress.querySelectorAll('i').forEach(function(el,j){el.classList.toggle('on',j<=step)});
+      nextB.textContent=step===STEPS.length-1?'Finish':'Next';nextB.hidden=false;backB.hidden=step===0;skipB.hidden=false;skipB.textContent='Skip';
+    }else if(mode==='done'){
+      light(null,null);setMood('safe');
+      kicker.textContent='Done';ctitle.textContent='That is the whole trip';
+      ctext.textContent='Press any part of the picture to see its threats and protections.';
+      progress.querySelectorAll('i').forEach(function(i){i.classList.add('on')});
+      nextB.textContent='Replay';nextB.hidden=false;backB.hidden=true;skipB.hidden=true;
+    }else if(mode==='explore'){
+      var s={};s[sel]=1;light(s,[sel]);
+      var rs=ROWS.filter(function(r){return r.ids.indexOf(sel)>-1});
+      setMood(rs.length?'checking':'hello');
+      kicker.textContent='What could go wrong';ctitle.textContent=NAMES[sel];
+      ctext.textContent=rs.length?'':'No separate threats here. This part is covered by the parts around it.';
+      progress.querySelectorAll('i').forEach(function(i){i.classList.remove('on')});
+      facts.innerHTML=rs.map(function(r){return '<div class="fact"><div><span class="k r">Risk</span>'+r.threat+'</div><div><span class="k f">Fix</span>'+r.fix+'</div>'+refsHtml(r)+'</div>'}).join('');
+      facts.hidden=!rs.length;
+      nextB.hidden=true;backB.hidden=true;skipB.hidden=false;skipB.textContent='Close';
+    }
+  }
+  nextB.addEventListener('click',function(){
+    if(mode==='free'||mode==='done'){mode='tour';step=0}
+    else if(mode==='tour'){if(step<STEPS.length-1)step++;else mode='done'}
+    render();
+  });
+  backB.addEventListener('click',function(){if(mode==='tour'&&step>0){step--;render()}});
+  skipB.addEventListener('click',function(){mode='free';sel=null;render()});
+  nodes.forEach(function(n){
+    function go(){sel=n.dataset.id;mode='explore';render()}
+    n.addEventListener('click',go);
+    n.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+  });
+  document.addEventListener('keydown',function(e){
+    if(mode==='tour'){if(e.key==='ArrowRight')nextB.click();else if(e.key==='ArrowLeft')backB.click();else if(e.key==='Escape')skipB.click()}
+    else if(mode==='explore'&&e.key==='Escape')skipB.click();
+  });
+  $('catwrap').addEventListener('click',function(){var w=$('catwrap');w.classList.add('boop');setTimeout(function(){w.classList.remove('boop')},1000)});
+
+  // full table (folded)
+  var rowsEl=$('rows');
+  ROWS.forEach(function(r){
+    var d=document.createElement('div');d.className='row';
+    var st=r.s.split('').map(function(c){return '<i>'+c+'</i>'}).join('');
+    d.innerHTML='<div class="where"><span>'+r.where+'</span><span class="st">'+st+'</span></div>'+
+      '<div><div class="cell-l">Threat</div>'+r.threat+'</div>'+
+      '<div><div class="cell-l">Protection</div>'+r.fix+'</div>'+
+      '<div><div class="cell-l">Comes from</div>'+(refsHtml(r)||'<span class="muted">design choice</span>')+'</div>';
+    rowsEl.appendChild(d);
+  });
+  $('count').textContent='('+ROWS.length+')';
+  var sr={},ac={},i;
+  ROWS.forEach(function(r){r.sr.forEach(function(n){sr[n]=1});r.ac.forEach(function(n){ac[n]=1})});
+  var srMiss=[],acMiss=[];
+  for(i=1;i<=29;i++)if(!sr[i])srMiss.push('SR-'+pad(i));
+  for(i=1;i<=18;i++)if(!ac[i])acMiss.push('AC-'+pad(i));
+  var txt='<b>'+(18-acMiss.length)+' of 18</b> abuse cases and <b>'+(29-srMiss.length)+' of 29</b> security requirements have a place in this diagram.';
+  if(srMiss.length)txt+=' '+srMiss.join(', ')+' belong to building and releasing the app (secrets, debug mode, scans).';
+  if(acMiss.length)txt+=' Not placed yet: '+acMiss.join(', ')+'.';
+  $('cover').innerHTML=txt;
+  render();
+})();
+</script>

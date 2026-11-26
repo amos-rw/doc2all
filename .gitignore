@@ -1,0 +1,51 @@
+# ------------------------------------------------------------------
+# Doc2All: what must never be committed
+# ------------------------------------------------------------------
+
+# Reading notes and course material (kept on our own computers only)
+docs/references/
+
+# Raw copies of code from the earlier project. We copy the parts we need into the app and adapt them
+# (see docs/development.md).
+reuse/
+
+# Local working notes (personal details, Drive links). Not for the repository.
+START_HERE.md
+docs/_cover.html
+
+# Secrets: keys, passwords, tokens. Commit an .env.example with fake values instead.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Files people upload, and what the app makes from them. They can hold personal data.
+uploads/
+media/
+private_files/
+tmp/
+
+# Sample documents that contain real personal data (use made-up samples in samples/public/)
+samples/private/
+
+# Databases and logs
+*.sqlite3
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Editors and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

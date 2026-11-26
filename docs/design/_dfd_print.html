@@ -1,0 +1,164 @@
+<style>
+.dfdfig{--surface:#FFFFFF;--ink:#14305C;--muted:#586C90;--line:#D6E0F0;--primary:#2F6BFF;--on-primary:#FFFFFF;
+  --scan:#19B5D6;--safe:#22B573;--warn:#EF5350;--warn-soft:#FDE3E1;--coral-text:#C73935;--ginger:#F2994A;--ginger-dark:#DB7C2B;
+  --f-proc:#EAF1FF;--f-store:#DDF4F9;--f-ext:#FFF0DE;--e-proc:#2F6BFF;--e-store:#19B5D6;--e-ext:#F2994A;
+  --lip-proc:#1B4BC4;--lip-store:#0E8DA6;--lip-ext:#DB7C2B;--on-cyan:#FFFFFF}
+.dfdfig svg.dfd{display:block;width:100%;height:auto;max-width:94%;margin:0 auto;overflow:visible;font-family:"DM Sans",ui-rounded,"Segoe UI",system-ui,sans-serif}
+.dfdfig .zone{fill:var(--surface);stroke:var(--warn);stroke-width:2.2;stroke-dasharray:9 7}
+.dfdfig .sbx{fill:var(--warn-soft);stroke:var(--warn);stroke-width:2.2;stroke-dasharray:9 7}
+.dfdfig .lip{stroke:none}.dfdfig .lip.proc{fill:var(--lip-proc)}.dfdfig .lip.store{fill:var(--lip-store)}.dfdfig .lip.ext{fill:var(--lip-ext)}
+.dfdfig .face{stroke-width:2.5}.dfdfig .face.proc{fill:var(--f-proc);stroke:var(--e-proc)}.dfdfig .face.store{fill:var(--f-store);stroke:var(--e-store)}.dfdfig .face.ext{fill:var(--f-ext);stroke:var(--e-ext)}
+.dfdfig .face.optx{stroke-dasharray:7 6}
+.dfdfig .chip{fill:var(--surface);stroke:var(--ginger);stroke-width:2.2}
+.dfdfig .clk,.dfdfig .clk-h{fill:none;stroke:var(--ginger-dark);stroke-width:2.2;stroke-linecap:round}
+.dfdfig .flow{fill:none;stroke:var(--ink);stroke-width:2.4}.dfdfig .flow.opt{stroke:var(--safe);stroke-dasharray:7 6}
+.dfdfig .mk{fill:var(--ink)}.dfdfig .mk-o{fill:var(--safe)}
+.dfdfig .t-title{font-size:16px;font-weight:800;fill:var(--ink)}
+.dfdfig .t-lab{font-size:14px;font-weight:800;fill:var(--ink)}
+.dfdfig .t-sub{font-size:12.5px;font-weight:700;fill:var(--muted)}
+.dfdfig .t-zone{font-size:12px;font-weight:800;letter-spacing:.14em;fill:var(--muted)}
+.dfdfig .t-coral{font-size:12px;font-weight:800;letter-spacing:.14em;fill:var(--coral-text)}
+.dfdfig .badge{fill:var(--primary)}.dfdfig .badge-t{font-size:13px;font-weight:800;fill:var(--on-primary);text-anchor:middle}
+.dfdfig .tbp rect{fill:var(--warn)}.dfdfig .tbp text{font-size:11.5px;font-weight:800;fill:#fff;text-anchor:middle;letter-spacing:.06em}
+.logc{fill:#19B5D6}.logl{stroke:#fff;stroke-width:1.7;stroke-linecap:round}
+.dfdfig .key{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:center;color:#586C90;font-size:11px;margin-top:10px}
+.dfdfig .key span{display:inline-flex;align-items:center;gap:7px}
+.dfdfig .sw{width:20px;height:13px;border-radius:5px;border:1.8px solid;flex:none}
+.dfdfig .sw.p{background:var(--f-proc);border-color:var(--e-proc)}.dfdfig .sw.s{background:var(--f-store);border-color:var(--e-store)}
+.dfdfig .sw.e{background:var(--f-ext);border-color:var(--e-ext)}.dfdfig .sw.b{background:transparent;border:2px dashed var(--warn)}
+.dfdfig .dot{width:17px;height:17px;border-radius:50%;display:inline-grid;place-items:center;font-size:9.5px;font-weight:800;background:var(--primary);color:#fff;flex:none}
+.dfdfig .dot.l{background:var(--scan)}
+</style>
+<figure class="dfdfig"><svg class="dfd" id="dfd" viewBox="0 36 1340 706" role="img" aria-label="Data-flow diagram of a file journey through Doc2All, from the browser through the upload gate, private storage and the sandbox, to the report and deletion.">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto-start-reverse"><path class="mk" d="M0 1 L9.4 5 L0 9z"/></marker>
+    <marker id="ah-o" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="5.2" markerHeight="5.2" orient="auto-start-reverse"><path class="mk-o" d="M0 1 L9.4 5 L0 9z"/></marker>
+    <g id="logb"><circle class="logc" r="10"/><line class="logl" x1="-4.5" y1="-3.4" x2="4.5" y2="-3.4"/><line class="logl" x1="-4.5" y1="0" x2="4.5" y2="0"/><line class="logl" x1="-4.5" y1="3.4" x2="1.5" y2="3.4"/></g>
+    <symbol id="ic-browser" viewBox="0 0 64 64">
+      <rect x="5" y="10" width="54" height="44" rx="9" fill="#fff"/>
+      <path d="M5 19 a9 9 0 0 1 9 -9 h36 a9 9 0 0 1 9 9 v4 h-54z" fill="#2F6BFF"/>
+      <circle cx="15" cy="17" r="2.4" fill="#fff"/><circle cx="23" cy="17" r="2.4" fill="#fff"/><circle cx="31" cy="17" r="2.4" fill="#fff"/>
+      <rect x="14" y="31" width="36" height="5" rx="2.5" fill="#C9D6EA"/><rect x="14" y="41" width="24" height="5" rx="2.5" fill="#C9D6EA"/>
+      <rect x="5" y="10" width="54" height="44" rx="9" fill="none" stroke="#14305C" stroke-width="3"/>
+    </symbol>
+    <symbol id="ic-key" viewBox="0 0 64 64">
+      <rect x="30" y="27" width="31" height="10" rx="4" fill="#FFC83D" stroke="#DB7C2B" stroke-width="3"/>
+      <path d="M47 37 v9 M55 37 v7" stroke="#DB7C2B" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="20" cy="32" r="14" fill="#FFC83D" stroke="#DB7C2B" stroke-width="3"/>
+      <circle cx="20" cy="32" r="5.5" fill="var(--f-proc)" stroke="#DB7C2B" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="ic-gear" viewBox="0 0 64 64">
+      <g fill="#2F6BFF"><rect x="27" y="4" width="10" height="56" rx="3"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(45 32 32)"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(90 32 32)"/><rect x="27" y="4" width="10" height="56" rx="3" transform="rotate(135 32 32)"/></g>
+      <circle cx="32" cy="32" r="19" fill="#2F6BFF" stroke="#1B4BC4" stroke-width="3"/>
+      <circle cx="32" cy="32" r="8" fill="var(--f-proc)" stroke="#1B4BC4" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="ic-mail" viewBox="0 0 64 64">
+      <rect x="6" y="14" width="52" height="38" rx="8" fill="#fff" stroke="#14305C" stroke-width="3"/>
+      <path d="M9 21 L32 39 L55 21" fill="none" stroke="#2F6BFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+
+  <rect class="zone" x="190" y="50" width="930" height="680" rx="26"/>
+  <rect class="sbx" x="840" y="245" width="250" height="210" rx="22"/>
+  <text class="t-zone" x="232" y="44">OUR SERVER</text>
+  <text class="t-zone" x="1180" y="72">NOT TRUSTED</text>
+  <text class="t-zone" x="20" y="290">NOT TRUSTED</text>
+  <text class="t-zone" x="1180" y="290">NOT TRUSTED</text>
+  <text class="t-coral" x="860" y="273">SANDBOX</text>
+  <g class="tbp"><rect x="168" y="228" width="44" height="24" rx="12"/><text x="190" y="244.5">TB1</text></g>
+  <g class="tbp"><rect x="818" y="233" width="44" height="24" rx="12"/><text x="840" y="249.5">TB2</text></g>
+  <g class="tbp"><rect x="1098" y="228" width="44" height="24" rx="12"/><text x="1120" y="244.5">TB3</text></g>
+
+  <path class="flow link" data-between="p1 d1" d="M370 142 H418" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d1 p2" d="M490 192 V300" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d1 p3" d="M710 192 V300" marker-start="url(#ah)" marker-end="url(#ah)"/>
+<path class="flow link" data-between="p2 d2" d="M490 424 V518" marker-end="url(#ah)"/>
+<path class="flow link" data-between="d2 p3" d="M740 518 V428" marker-end="url(#ah)"/>
+<path class="flow link" data-between="p2 p3" d="M560 360 H638" marker-end="url(#ah)"/>
+<circle class="badge" cx="490" cy="497" r="12"/><text class="badge-t" x="490" y="501.6">4</text>
+  <g><path class="flow" d="M122 302 V142 H228" marker-end="url(#ah)"/><circle class="badge" cx="122" cy="222" r="12"/><text class="badge-t" x="122" y="226.6">1</text></g>
+<g><path class="flow" d="M150 360 H418" marker-end="url(#ah)"/><circle class="badge" cx="284" cy="360" r="12"/><text class="badge-t" x="284" y="364.6">3</text></g>
+<g><path class="flow" d="M780 340 H893" marker-end="url(#ah)"/><circle class="badge" cx="812" cy="340" r="12"/><text class="badge-t" x="812" y="344.6">5</text></g>
+<g><path class="flow" d="M930 520 V426" marker-end="url(#ah)"/><circle class="badge" cx="930" cy="490" r="12"/><text class="badge-t" x="930" y="494.6">5</text></g>
+<g><path class="flow" d="M893 384 H782" marker-end="url(#ah)"/><circle class="badge" cx="812" cy="384" r="12"/><text class="badge-t" x="812" y="388.6">7</text></g>
+<g><path class="flow" d="M1000 426 V518" marker-end="url(#ah)"/><circle class="badge" cx="1000" cy="490" r="12"/><text class="badge-t" x="1000" y="494.6">7</text></g>
+<g><path class="flow" d="M680 424 V470 H503 a13 13 0 0 0 -26 0 H85 V428" marker-end="url(#ah)"/><circle class="badge" cx="300" cy="470" r="12"/><text class="badge-t" x="300" y="474.6">8</text></g>
+<g><path class="flow opt" d="M1035 360 H1178" marker-end="url(#ah-o)"/><circle class="badge" cx="1150" cy="360" r="12"/><text class="badge-t" x="1150" y="364.6">6</text></g>
+<g><path class="flow" d="M300 84 V64 H1150 V142 H1178" marker-end="url(#ah)"/><circle class="badge" cx="700" cy="64" r="12"/><text class="badge-t" x="700" y="68.6">2</text></g>
+  <g>
+  <rect class="lip ext" x="20" y="308" width="130" height="116" rx="26"/>
+  <rect class="face ext" x="20" y="302" width="130" height="116" rx="26"/>
+  
+  <use href="#ic-browser" x="52.0" y="312" width="54" height="54"/><use href="#ic-key" x="93.0" y="308" width="36" height="36"/>
+  <text class="t-title" x="85.0" y="385" text-anchor="middle">Browser</text><text class="t-sub" x="85.0" y="405" text-anchor="middle">+ passkey</text>
+  </g>
+<g>
+  <rect class="lip ext" x="1180" y="90" width="130" height="116" rx="26"/>
+  <rect class="face ext" x="1180" y="84" width="130" height="116" rx="26"/>
+  
+  <use href="#ic-mail" x="1213.0" y="96" width="64" height="64"/>
+  <text class="t-title" x="1245.0" y="185" text-anchor="middle">Email service</text>
+  </g>
+<g>
+  <rect class="lip ext optx" x="1180" y="308" width="130" height="116" rx="26"/>
+  <rect class="face ext optx" x="1180" y="302" width="130" height="116" rx="26"/>
+  
+  <image href="icons/cloud-t.png" x="1210.0" y="320" width="70" height="70" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="1245.0" y="403" text-anchor="middle">Outside OCR</text>
+  </g>
+<g>
+  <rect class="lip proc" x="230" y="90" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="230" y="84" width="140" height="116" rx="26"/>
+  
+  <use href="#ic-key" x="268.0" y="96" width="64" height="64"/>
+  <text class="t-title" x="300.0" y="185" text-anchor="middle">Sign-in</text>
+  <use class="lb" href="#logb" x="355" y="99"/></g>
+<g>
+  <rect class="lip proc" x="420" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="420" y="302" width="140" height="116" rx="26"/>
+  
+  <image href="icons/shield-t.png" x="458.0" y="314" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="490.0" y="403" text-anchor="middle">Upload gate</text>
+  <use class="lb" href="#logb" x="545" y="317"/></g>
+<g>
+  <rect class="lip proc" x="640" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="640" y="302" width="140" height="116" rx="26"/>
+  
+  <use href="#ic-gear" x="678.0" y="314" width="64" height="64"/>
+  <text class="t-title" x="710.0" y="403" text-anchor="middle">Job manager</text>
+  <use class="lb" href="#logb" x="765" y="317"/></g>
+<g>
+  <rect class="lip proc" x="895" y="308" width="140" height="116" rx="26"/>
+  <rect class="face proc" x="895" y="302" width="140" height="116" rx="26"/>
+  
+  <image href="icons/sealed-box-t.png" x="930.0" y="318" width="70" height="70" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="965.0" y="403" text-anchor="middle">Runner</text>
+  <use class="lb" href="#logb" x="1020" y="317"/></g>
+<g>
+  <rect class="lip store" x="420" y="98" width="320" height="100" rx="26"/>
+  <rect class="face store" x="420" y="92" width="320" height="100" rx="26"/>
+  
+  <image href="icons/database-t.png" x="436.0" y="110.0" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="512" y="147.0">Database</text>
+  <use class="lb" href="#logb" x="723" y="109"/>
+  </g>
+<g>
+  <rect class="lip store" x="420" y="526" width="670" height="84" rx="26"/>
+  <rect class="face store" x="420" y="520" width="670" height="84" rx="26"/>
+  
+  <image href="icons/locked-folder-t.png" x="436.0" y="530.0" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="512" y="567.0">Private files</text>
+  <use class="lb" href="#logb" x="1073" y="537"/>
+  <g >
+    <rect class="chip" x="868" y="541" width="196" height="42" rx="21"/>
+    <circle class="clk" cx="893" cy="562" r="10"/><path class="clk-h" d="M893 556 V562 L898 565"/>
+    <text class="t-lab" x="912" y="567">gone in 24 h</text><circle class="badge" cx="858" cy="562" r="12"/><text class="badge-t" x="858" y="566.6">9</text></g></g>
+<g>
+  <rect class="lip store" x="230" y="638" width="860" height="68" rx="26"/>
+  <rect class="face store" x="230" y="632" width="860" height="68" rx="26"/>
+  
+  <image href="icons/log-page-t.png" x="246.0" y="640.0" width="52" height="52" preserveAspectRatio="xMidYMid meet"/>
+  <text class="t-title" x="322" y="671.0">Audit log</text>
+  
+  <circle class="badge" cx="1062" cy="666" r="12"/><text class="badge-t" x="1062" y="670.6">10</text></g>
+</svg><div class="key"><span><i class="sw p"></i>Our code</span><span><i class="sw s"></i>Where data rests</span><span><i class="sw e"></i>Outside our control</span><span><i class="sw b"></i>Trust boundary</span><span><i class="dot">1</i>Step of the journey</span><span><i class="dot l">&#8801;</i>Writes to the audit log</span></div><figcaption>Figure 4.1. The journey of one file through Doc2All.</figcaption></figure>
