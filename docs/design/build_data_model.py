@@ -11,7 +11,7 @@ TABLES = {
         ("id", "random, 128 bits", "random"), ("email", "one account per address", ""),
         ("email_confirmed_at", "empty until the emailed code is entered", ""),
         ("password_hash", "slow, salted hash (Argon2id). Never the password", "hash"),
-        ("role", "user or administrator", ""), ("email_code_step", "can be off only if a passkey exists", ""),
+        ("role", "user or administrator", ""), ("email_code_step", "can be off only with two passkeys or more", ""),
         ("file_notices, finish_sound", "on or off", ""), ("created_at", "", "")]),
     "passkeys": ("Passkeys", "account", "A user can have several.", "SR-28", [
         ("id", "random", "random"), ("user_id", "whose it is", "owner"),
@@ -23,7 +23,7 @@ TABLES = {
         ("wrong_tries", "dead at 5", ""), ("used_at", "works once", "")]),
     "sessions": ("Sessions", "account", "Who is signed in now.", "SR-03 SR-27", [
         ("key", "random, kept in an HTTP-only cookie", "random"), ("user_id", "whose it is", "owner"),
-        ("second_step_at", "empty means not signed in yet", ""), ("passkey_challenge", "new each time, works once", ""),
+        ("second_step_at", "empty means not signed in yet", ""), ("confirmed_at", "second step done again, counts for 5 minutes", ""), ("passkey_challenge", "new each time, works once", ""),
         ("device_name", "shown in Settings", ""), ("last_seen_at", "ends after 30 minutes idle", "")]),
     "devices": ("Known devices", "account", "Needed to notice a sign-in on a new device.", "SR-29", [
         ("id", "", ""), ("user_id", "whose it is", "owner"), ("device_hash", "hash of a random value in a cookie", "hash"),

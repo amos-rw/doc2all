@@ -33,7 +33,13 @@ design_46, design_47 = design_46.split("### 4.7", 1)
 screens_intro, screens_table = ("### 4.6" + design_46).split("<!--SCREENS-->")
 # the still data model drawing (made by build_data_model.py) gets its own landscape page, its tables follow
 data_html = (root / "docs" / "design" / "_data_print.html").read_text(encoding="utf-8")
+design_47, design_48 = design_47.split("### 4.8", 1)
 data_intro, data_tables = ("### 4.7" + design_47).split("<!--DATA-->")
+# 4.8: the access drawing and the common checks on a landscape page, then every call (made by build_server_interfaces.py)
+calls_figure = (root / "docs" / "design" / "_calls_figure.html").read_text(encoding="utf-8")
+calls_tables = (root / "docs" / "design" / "_calls_print.html").read_text(encoding="utf-8")
+calls_intro, calls_rest = ("### 4.8" + design_48).split("<!--CHECKS-->")
+calls_checks, calls_after = calls_rest.split("<!--CALLS-->")
 design_41 = "### 4.1" + design_41
 
 extra_css = """
@@ -45,6 +51,16 @@ extra_css = """
 .dfdfig figcaption{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
 @page land{size:A4 landscape;margin:12mm 14mm 16mm;@bottom-center{content:counter(page);font-family:"DM Sans",sans-serif;font-size:9pt;color:#7A879E}}
 @media print{.paper.land{page:land;max-width:none;padding:0}.dfdfig figcaption{font-size:9pt}.dfdfig .key{font-size:8.5pt}}
+
+/* section 4.8: the common checks in two columns, then compact tables of calls */
+.checks ol{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:column;grid-template-rows:repeat(4,auto);gap:10px 24px;font-size:13px;line-height:1.5}
+.calls table{table-layout:fixed}
+.calls th:nth-child(1){width:31%}.calls th:nth-child(2){width:14%}.calls th:nth-child(3){width:38%}.calls th:nth-child(4){width:17%}
+.calls td{padding:7px 10px 7px 0;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.calls code{font-size:10px;padding:0;background:none;color:var(--muted);display:block;margin-top:2px}
+.calls td div+div{margin-top:2px}
+@media (max-width:640px){.checks ol{grid-template-columns:minmax(0,1fr);grid-auto-flow:row;grid-template-rows:none}.calls table{min-width:560px}}
+@media print{.checks ol{font-size:9.5pt;gap:2.5mm 8mm;margin-top:4mm}.calls td{font-size:8.4pt;padding:1.6mm 2.5mm 1.6mm 0}.calls code{font-size:7.4pt}.calls .tag{font-size:6.8pt;padding:0 1.4mm}.calls thead{display:table-header-group}}
 
 /* section 4.6: screen map and full-size screens */
 .smap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 16px;margin-top:16px}
@@ -70,7 +86,7 @@ PLAN = [
     ("1", "Introduction", "The problem, why security matters, and security in every step of the life cycle"),
     ("2", "Objectives", "The general objective and the specific objectives, in the order the system is built"),
     ("3", "Requirements", "Functional, non-functional and security requirements, abuse cases and traceability"),
-    ("4", "Design", "The threat model (data-flow diagram, trust boundaries, threats and protections), the screens and the data model"),
+    ("4", "Design", "The threat model (data-flow diagram, trust boundaries, threats and protections), the screens, the data model and the server interfaces"),
     ("5", "Implementation", "Secure coding rules and the features, built one after another"),
     ("6", "Testing", "One test per abuse case, code, dependency and dynamic scans, fixes and retests"),
     ("7", "Deployment", "The hardening checklist for going live"),
@@ -371,6 +387,12 @@ strong{{color:var(--head)}}
 
 <article class="paper doc">
   <div class="block">{render(data_tables)}</div>
+</article>
+
+<section class="paper land">{render(calls_intro)}{calls_figure}<div class="checks">{render(calls_checks)}</div></section>
+
+<article class="paper doc">
+  <div class="block">{calls_tables}{render(calls_after)}</div>
 
   <div class="block">
     <div class="kicker">References</div>

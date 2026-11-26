@@ -9,14 +9,14 @@ Where each design lives. If two documents disagree, the [report text](../02-doc2
 | Screens | [screens.md](screens.md), report section 4.6 | `screens.src.html` | `build_screens.py`, `build_screen_shots.py`, `build_screens_doc.py` |
 | The cat, colours and type | `doc2all-cat.html` (open in a browser) | the same file | written by hand |
 | Data model | [data-model.md](data-model.md), report section 4.7 | `build_data_model.py` | `build_data_model.py` |
-| Server interfaces | to be designed (report section 4.8) | | |
+| Server interfaces | [server-interfaces.md](server-interfaces.md), report section 4.8 | `build_server_interfaces.py` | `build_server_interfaces.py` |
 
 ## Files here
 
 | File | What it is |
 | --- | --- |
 | `*.src.html` | Sources you edit |
-| `doc2all-*.html`, `_dfd_print.html` | Built pages (do not edit by hand, except `doc2all-cat.html`) |
+| `doc2all-*.html`, `_*.html` | Built pages (do not edit by hand, except `doc2all-cat.html`) |
 | `shots/` | Pictures of the screens, light mode, computer view |
 | `icons/` | Icons used in the diagram (from Pixabay) |
 | `build_*.py` | The builders |
@@ -26,4 +26,5 @@ Interactive previews (private Claude pages of the author):
 [threat model tour](https://claude.ai/artifact/36jnFcuxqsz5RbK412PoaP) ·
 [screens](https://claude.ai/artifact/8aEvFXWLE7zcDjJ4owATdj) ·
 [cat](https://claude.ai/artifact/Por6pHoLVCK7YRSGcGFXjJ) ·
-[data model](https://claude.ai/artifact/V9gsmYkzTdkW5tRiqJyvTM)
+[data model](https://claude.ai/artifact/V9gsmYkzTdkW5tRiqJyvTM) ·
+[server interfaces](https://claude.ai/artifact/ET8CuxVsaenuCPWR997CEE)

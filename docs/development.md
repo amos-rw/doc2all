@@ -1,6 +1,7 @@
 # Development plan
 
-Read the [security rules](design/security-rules.md) and the [screens](design/screens.md) next to this.
+Read the [security rules](design/security-rules.md), the [screens](design/screens.md), the [data model](design/data-model.md) and the
+[server interfaces](design/server-interfaces.md) next to this.
 
 ## Decisions
 

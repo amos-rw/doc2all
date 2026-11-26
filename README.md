@@ -8,7 +8,7 @@ from a scanned page, and **checks and cleans every file** on the way. It then sh
 It is a project for the module *Application Security Technologies*, to show security at **every step of the software
 development life cycle (SDLC)**.
 
-> Status: requirements written, design in progress. No application code yet.
+> Status: requirements and design written. No application code yet.
 
 ## What it does
 
@@ -31,6 +31,7 @@ development life cycle (SDLC)**.
 | [Security rules](docs/design/security-rules.md) | What every feature must check, with the limits |
 | [Screens](docs/design/screens.md) | The eleven screens, their views and rules |
 | [Data model](docs/design/data-model.md) | What is saved, how it connects, when it is removed |
+| [Server interfaces](docs/design/server-interfaces.md) | Every call the browser can make, who may make it, what is checked |
 | [Development plan](docs/development.md) | Tools, code reused from our earlier project, build order |
 | [Concept](docs/01-concept.md) | The first idea, in one page |
 
@@ -57,6 +58,7 @@ python -I docs/design/build_screens.py
 python -I docs/design/build_screen_shots.py
 python -I docs/design/build_screens_doc.py
 python -I docs/design/build_data_model.py
+python -I docs/design/build_server_interfaces.py
 python -I docs/design/build_report.py
 ```
 

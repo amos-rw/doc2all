@@ -134,9 +134,9 @@ Each requirement says how it is checked. The values in **bold** are the limits t
 | SR-02 | After **5** failed sign-ins in **10 minutes**, further attempts for that account or address are refused for **15 minutes**. | Script 6 wrong logins: the 6th is refused. |
 | SR-03 | A session ends after **30 minutes** without activity and on sign-out. | Wait or force the time: the old session is rejected. |
 | SR-25 | One-time codes are random, **6** digits, valid for **10 minutes** and usable once. They are stored only as a hash. After **5** wrong tries a code stops working. At most **3** codes per hour are sent to one address. | Use a code twice: refused. Try 6 wrong codes: the code is dead. Ask for a 4th code in an hour: refused. |
-| SR-26 | Forgot password: the answer is the same whether or not the email has an account. A reset needs the emailed code and, when the account has a second step, that step too. After a reset all sessions end and the user is told by email. | Ask for a reset with a known and an unknown email: same answer. Reset, then use the old session: rejected. |
-| SR-27 | Every sign-in needs a second step after the password: a passkey or a one-time code. Passkeys are preferred. Changing the password, the email or the passkeys, or deleting the account, needs the second step again. | Sign in with the password only: no access. Change the email or delete the account without the second step: refused. |
-| SR-28 | Passkeys use WebAuthn. The server stores only the public key, each sign-in uses a new random challenge that works once, and a passkey works only on the Doc2All domain. A user can have several passkeys, and the last second step cannot be removed. | Replay an old sign-in response: refused. Use the passkey on another domain: refused. |
+| SR-26 | Forgot password and account creation give the same answer whether or not the email has an account. Creating an account with a known email only tells its owner by email, within the limit of SR-25. A reset needs the emailed code and, when the account has a passkey, that passkey too. After a reset all sessions end and the user is told by email. | Reset and register with a known and an unknown email: same answer. Reset an account that has a passkey with the code only: refused. Reset, then use the old session: rejected. |
+| SR-27 | Every sign-in needs a second step after the password: a passkey or a one-time code. Passkeys are preferred. Changing the password, the email, the passkeys or the email code setting, deleting the account, or answering that a security notice was the user's own action, needs the second step again. It then counts for **5 minutes**. | Sign in with the password only: no access. Change the email, delete the account or answer a notice with yes without the second step, or 6 minutes after it: refused. |
+| SR-28 | Passkeys use WebAuthn. The server stores only the public key, each sign-in uses a new random challenge that works once, and a passkey works only on the Doc2All domain. A user can have several passkeys. Email codes can be stopped only while the account has at least **two** passkeys, and the last second step cannot be removed. | Replay an old sign-in response: refused. Use the passkey on another domain: refused. Stop email codes with one passkey: refused. |
 | SR-29 | A change to the password, email or passkeys, and a sign-in on a new device, is pinned in the app until the user answers it and is also sent by email, to the address the account had before the change. A deleted account is confirmed by email. Notices about files stay in the app. A device is recognised by a random value in a cookie, and the server keeps only its hash. | Add a passkey: the notice is pinned and an email arrives. Change the email: the old address is told. Finish a job: no email is sent. |
 
 **Access control**
@@ -204,10 +204,10 @@ An abuse case is a story of someone misusing the app. Each one is matched to the
 | AC-12 | User (by mistake) | Share a file that still has hidden data or personal text | SR-15, SR-16 | Clean and black-out checks on samples |
 | AC-13 | Attacker | Guess a one-time code, or flood someone's mailbox with codes | SR-25 | Try wrong codes; ask for many codes |
 | AC-14 | Attacker | Sign in with a stolen or guessed password | SR-27, SR-28 | Password only: no access |
-| AC-15 | Attacker | Use forgot password to take over an account, or to find which emails have accounts | SR-26, SR-27 | Reset with known and unknown emails; reset without the second step |
+| AC-15 | Attacker | Use forgot password to take over an account, or use it or account creation to find which emails have accounts | SR-26, SR-28 | Reset and register with known and unknown emails; reset without the passkey |
 | AC-16 | Attacker | Build a fake site that collects codes or passkey sign-ins | SR-21, SR-28 | Use a passkey on another domain |
 | AC-17 | Attacker | Send a file with a script that starts on opening, hoping the user keeps it | SR-15 | Ask to keep everything: it is still removed |
-| AC-18 | Attacker | Use an open session to delete the account or change how it signs in, without the owner noticing | SR-27, SR-29 | Try without the second step; check the notice and the email |
+| AC-18 | Attacker | Use an open session to delete the account or change how it signs in, without the owner noticing | SR-27, SR-29 | Try a change, and answering the notice, without the second step; check the notice and the email |
 
 ### 3.7 Traceability
 Each feature points to the requirements that protect it.
@@ -273,8 +273,8 @@ Each row names a part of the diagram, the threats there, the protection, and the
 | Step 1 · Sign-in and sessions<br>S, R | An old or stolen session keeps working, and nobody can tell who signed in. | Sessions end after 30 minutes idle and on sign-out. Every sign-in is logged. | SR-03, SR-20, AC-08 |
 | Step 2 · Second step and passkeys<br>S, E | A stolen or phished password is enough to sign in. A fake site collects a code. | A second step is always required. A passkey works only on our own domain and never leaves the device. The server keeps only a public key. | SR-21, SR-27, SR-28, AC-14, AC-16 |
 | Step 2 · One-time codes by email<br>S, I, D | Someone guesses a code, floods a mailbox with codes, or learns which emails have accounts. | Codes are random, last 10 minutes, work once and die after 5 wrong tries. Only 3 are sent per hour. The email carries only the code. | SR-17, SR-25, SR-26, AC-13, AC-15 |
-| Step 2 · Forgot password<br>S, E | A reset is used to take over an account, or to skip the second step. | A reset needs the emailed code and, when set, the second step. The answer is the same for unknown emails. All sessions end after a reset, and the user is told by email. | SR-26, SR-27, AC-15 |
-| Step 2 · Account changes<br>S, R | Someone at an open session deletes the account or changes how it signs in, and the owner does not notice. | The second step is asked again. A notice is pinned in the app and emailed. Emails never hold document content or file names. | SR-27, SR-29, AC-18 |
+| Step 2 · Forgot password<br>S, E | A reset is used to take over an account, or to skip the second step. | A reset needs the emailed code, and the passkey when the account has one. The answer is the same for unknown emails. All sessions end after a reset, and the user is told by email. | SR-26, SR-28, AC-15 |
+| Step 2 · Account changes<br>S, R | Someone at an open session deletes the account or changes how it signs in, and the owner does not notice. | The second step is asked again, also to answer that a notice was the user's own action. A notice is pinned in the app and emailed. Emails never hold document content or file names. | SR-27, SR-29, AC-18 |
 | Step 3 · File and choices<br>T, S | A program renamed .pdf. A name like ../../x.pdf. An upload with no sign-in. | The server decides the type from the name and first bytes. The name becomes a random one. Sign-in is needed. | SR-07, SR-08, SR-10, AC-03, AC-04 |
 | Step 3 · Upload gate<br>D | A zip or Office bomb, or a flood of uploads, uses up the server. | 20 MB, 100 pages, 20 uploads an hour. Files that expand over 100 times are rejected before opening. | SR-09, SR-14, AC-05, AC-09 |
 | Step 4 · Private files<br>I | A guessed link or a direct address shows someone a file. | Random 128-bit ids. A private folder the web server does not serve. Downloads only through the owner check. | SR-05, SR-10, SR-11, AC-01 |
@@ -302,7 +302,7 @@ The screens show how a person meets these protections. Figure 4.2 maps all eleve
 | 3 | choose | Second step | A password is never enough. The passkey is the first choice, and a code by email is the other. | FR-11, SR-27, SR-28, AC-14, AC-16 |
 | 5 | clean | Clean options | The user sees what was found. What runs by itself is always removed, and the user chooses the rest. | FR-05, SR-15, AC-17 |
 | 7 | clear | Safety report | Each finding says what it means and what was done, and when the file is deleted. | FR-07, SR-15, SR-18, NFR-02 |
-| 8 | pinned | History | Only the owner's files are listed. A security notice stays pinned until the user answers it. | FR-08, SR-04, SR-18, SR-29 |
+| 8 | pinned | History | Only the owner's files are listed. A security notice stays pinned until answered, and answering yes asks for the second step. | FR-08, SR-04, SR-18, SR-27, SR-29 |
 | 11 | record | Audit log (administrator) | An administrator sees who did what and when, never the content of a document. | SR-06, SR-19, SR-20, AC-10 |
 
 ### 4.7 Data model
@@ -337,6 +337,31 @@ The application's database account can read and write these tables, but on the a
 | Attempt counters | After 24 hours |
 | Users, passkeys, known devices, notices | The account is deleted |
 | Audit log | It stays, without any name, email, file name or content |
+
+### 4.8 Server interfaces
+
+The browser reaches the server only through the calls in this section, and any other address is refused. Each call states who may make it. Figure 4.10 shows how a person moves from one level of access to the next, and every call then passes the same eight checks. In the tables that follow, **Owner only** means signed in and asking for one's own item, and **Confirmed** means the second step was done again in the last 5 minutes.
+
+<!--CHECKS-->
+
+1. **HTTPS.** Nothing travels unprotected, and every answer carries security headers.
+2. **A listed call.** A call that is not marked open needs a sign-in.
+3. **Form token.** A change is accepted only with the token that the Doc2All page holds.
+4. **Session.** It is real, has not rested for 30 minutes, and is at the right step.
+5. **Role and owner.** One place decides. Another person's item is "not found".
+6. **Input.** Type, size and allowed values are checked, and extra fields are ignored.
+7. **Limits.** Too many tries are refused.
+8. **Log and answer.** Important actions are logged. An error is plain, with no inside details.
+
+<!--CALLS-->
+
+A refused call gets a short answer: something in the request is wrong (400), sign in first (401), do the second step again (403), not found (404, also for another person's item and for administrator pages without the role), or too many tries (429).
+
+Some actions have no call at all. The 24-hour deletion runs on a server timer. The administrator role is given, and the audit log fingerprints are checked, by commands on the server. The sandbox runner has no address that the browser can reach.
+
+All 18 abuse cases are linked to at least one call.
+
+Two limits are accepted. For an account that uses only emailed codes, a person who controls the mailbox can reset the password and sign in, so a passkey is recommended. A person who forgets the password and loses every passkey cannot reset it, so a second passkey is recommended too.
 
 ## References
 - Humayun, M., Jhanjhi, N. Z., Almufareh, M. F., & Khalil, M. I. (2022). Security threat and vulnerability assessment and measurement in secure software development. *Computers, Materials & Continua*, 71(3). https://doi.org/10.32604/cmc.2022.019289

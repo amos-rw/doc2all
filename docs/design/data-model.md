@@ -36,7 +36,7 @@ One row per person. Requirements: SR-01, SR-06, SR-27.
 | `email_confirmed_at` | empty until the emailed code is entered |  |
 | `password_hash` | slow, salted hash (Argon2id). Never the password | saved as hash |
 | `role` | user or administrator |  |
-| `email_code_step` | can be off only if a passkey exists |  |
+| `email_code_step` | can be off only with two passkeys or more |  |
 | `file_notices, finish_sound` | on or off |  |
 | `created_at` |  |  |
 
@@ -77,6 +77,7 @@ Who is signed in now. Requirements: SR-03, SR-27.
 | `key` | random, kept in an HTTP-only cookie | random |
 | `user_id` | whose it is | owner check |
 | `second_step_at` | empty means not signed in yet |  |
+| `confirmed_at` | second step done again, counts for 5 minutes |  |
 | `passkey_challenge` | new each time, works once |  |
 | `device_name` | shown in Settings |  |
 | `last_seen_at` | ends after 30 minutes idle |  |

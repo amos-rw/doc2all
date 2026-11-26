@@ -21,11 +21,14 @@ checked are in the [report text](../02-doc2all-report.md), sections 3.5, 3.6 and
 | Failed sign-ins | 5 in 10 minutes, then refused for 15 minutes | SR-02 |
 | Session ends | 30 minutes idle, and on sign-out | SR-03 |
 | One-time codes, stored as a hash | 6 digits, 10 minutes, one use, 5 tries, 3 per hour per address | SR-25 |
-| Forgot password | Same answer for any email, needs the second step, ends all sessions, emails the user | SR-26 |
-| Second step | Always. Again for changing password, email or passkeys, and for deleting the account | SR-27 |
-| Passkeys (WebAuthn) | Only the public key is stored, new challenge each time, own domain only, last second step cannot be removed | SR-28 |
+| Forgot password | Same answer for any email, needs the passkey when there is one, ends all sessions, emails the user | SR-26 |
+| Create account | Same answer for a known email, and its owner is told by email | SR-26 |
+| Second step | Always. Again for changing password, email, passkeys or the email code setting, deleting the account, and answering "it was me". Counts 5 minutes | SR-27 |
+| Passkeys (WebAuthn) | Only the public key is stored, new challenge each time, own domain only. Email codes can be off only with two passkeys or more. The last second step cannot be removed | SR-28 |
 | Signed-in only | Everything except sign-in, registration, forgot password, Privacy, Cookies, About | SR-07 |
 | Roles | Administrators see records and the audit log with ids, never file names or document content | SR-06 |
+
+Every call the browser can make, with its checks, is in [server-interfaces.md](server-interfaces.md).
 
 ## Upload and processing
 
